@@ -1,0 +1,647 @@
+<meta charset="utf-8">
+<title>Single Source of Training</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Noto+Sans+Arabic:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: cream hero band with centred logo and wavy edge, sticky pill tab bar on white, rounded cards with orange wave strip */
+:root{
+  --bg:#FFFFFF; --surface:#FFFFFF; --surface2:#F5F5F6; --line:#E3E5E8; --fg:#343B46; --head:#343B46; --muted:#667085;
+  --accent:#D61F26; --accent-ink:#B8191F; --accent-soft:#FCE4E5; --on-accent:#FFFFFF;
+  --good:#1B7F4E; --good-soft:#DDF1E5; --warn:#9A5B00; --warn-soft:#FCEBCB; --bad:#C0392B; --bad-soft:#FADDD8;
+  --c-open:#8A919E; --c-present:#343B46; --c-practice:#D61F26; --c-check:#667085;
+  --f-head:'Figtree','Noto Sans Arabic',system-ui,sans-serif;
+  --f-body:'Figtree','Noto Sans Arabic',system-ui,sans-serif;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:13.5px;line-height:1.55;padding-block:0 48px}
+button{font:inherit;color:inherit;cursor:pointer}
+h1,h2,h3{font-family:var(--f-head);margin:0;text-wrap:balance;color:var(--head)}
+.wrap{max-width:1180px;margin-inline:auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* top bar + dark hero */
+.top{background:var(--surface);border-bottom:1px solid var(--line)}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-block:12px}
+.brand{display:flex;align-items:center;gap:10px}
+.mk{min-width:34px;height:32px;padding-inline:7px;border-radius:9px;background:var(--accent);color:#fff;display:grid;place-items:center;font:700 12px var(--f-head);letter-spacing:.03em}
+.brand b{font:700 17px var(--f-head);color:var(--head);letter-spacing:-.01em}
+.hero{background:#343B46;color:#fff;padding-block:clamp(28px,5vw,52px) clamp(24px,4vw,40px);margin-bottom:12px}
+.hname{font:700 clamp(26px,4.2vw,42px)/1.1 var(--f-head);color:#fff;text-wrap:balance;margin:0}
+.tag{margin:10px 0 0;color:rgba(255,255,255,.78);font-size:clamp(14px,1.6vw,17px);max-width:60ch}
+.heroctl{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-top:22px}
+.demo{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;padding:4px 11px;border-radius:9999px;background:rgba(255,255,255,.14);color:#fff}
+.seg{display:inline-flex;background:var(--surface2);border-radius:9999px;padding:3px;gap:2px}
+.seg button{border:0;background:transparent;padding:7px 15px;border-radius:9999px;color:var(--head);font-weight:500}
+.seg button[aria-pressed="true"]{background:var(--accent);color:#fff}
+.hero .seg{background:rgba(255,255,255,.14)}
+.hero .seg button{color:#fff}
+.hero .seg button[aria-pressed="true"]{background:#fff;color:var(--head)}
+/* nav */
+.navwrap{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+.tabs{display:flex;gap:6px;overflow-x:auto;width:100%;padding-block:10px;scrollbar-width:none}
+.tabs button{border:0;background:transparent;padding:8px 18px;border-radius:32px;color:var(--head);font-weight:500;white-space:nowrap}
+.tabs button:hover{background:var(--surface2)}
+.tabs button[aria-current="page"]{background:var(--accent);color:var(--on-accent)}
+
+/* page */
+main{padding-top:clamp(20px,3vw,32px);display:grid;gap:clamp(16px,2.2vw,24px)}
+.head h1{font-size:26px;color:var(--accent)}
+.head p{margin:6px 0 0;color:var(--muted);max-width:70ch}
+.grid{display:grid;gap:clamp(12px,1.6vw,20px)}
+.g2{grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr))}
+.split{grid-template-columns:minmax(0,5fr) minmax(0,7fr)}
+@media(max-width:900px){.split{grid-template-columns:minmax(0,1fr)}}
+.tiles{grid-template-columns:repeat(auto-fit,minmax(min(100%,170px),1fr))}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:clamp(16px,2vw,24px);min-width:0}
+.panel h2{font-size:16px;margin-bottom:2px}
+.sub{color:var(--muted);font-size:12.5px;margin:0 0 14px}
+.tile{position:relative;background:var(--surface2);border-radius:16px;padding:16px 18px 18px;overflow:hidden}
+.tile .l{color:var(--muted);font-size:12px}
+.tile .v{font:600 28px var(--f-head);color:var(--head);font-variant-numeric:tabular-nums;margin-top:2px}
+.tile .d{font-size:12px;font-weight:500;margin-top:2px;min-height:18px}
+.good{color:var(--good)}.bad{color:var(--bad)}.warn{color:var(--warn)}
+.pill{display:inline-block;font-size:11.5px;font-weight:600;padding:2px 10px;border-radius:99px;white-space:nowrap}
+.p-good{background:var(--good-soft);color:var(--good)}.p-warn{background:var(--warn-soft);color:var(--warn)}
+.p-bad{background:var(--bad-soft);color:var(--bad)}.p-mute{background:var(--surface2);color:var(--muted)}
+.btn{border:1px solid var(--line);background:var(--surface);color:var(--accent-ink);padding:8px 18px;border-radius:32px;font-weight:500}
+.btn:hover{background:var(--surface2)}
+.btn.pri{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.btn.pri:hover{filter:brightness(.94)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.row-between{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin-bottom:12px}
+.tw{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:start;font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);font-weight:600;padding:8px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:10px;border-bottom:1px solid var(--line);vertical-align:middle}
+tr:last-child td{border-bottom:0}
+tr.sel td{background:var(--surface2)}
+tr[data-act]{cursor:pointer}
+tr[data-act]:hover td{background:var(--surface2)}
+td.n,th.n{font-variant-numeric:tabular-nums}
+.mono{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px;color:var(--muted)}
+
+/* bars */
+.brow{display:grid;grid-template-columns:90px minmax(0,1fr) 44px;gap:10px;align-items:center;margin:9px 0}
+.track{position:relative;height:12px;background:var(--surface2);border-radius:99px}
+.fill{height:100%;border-radius:99px;background:var(--accent);transition:width .5s ease}
+.fill.hi{background:var(--good)}.fill.lo{background:var(--bad)}
+.avg{position:absolute;top:-4px;bottom:-4px;width:2px;background:var(--head);opacity:.6}
+.val{font-variant-numeric:tabular-nums;font-weight:600;text-align:end}
+.axis{display:flex;justify-content:space-between;color:var(--muted);font-size:11px;margin-inline:100px 54px}
+.spreadbox{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:baseline;margin:6px 0 10px}
+.spreadbox b{font:600 30px var(--f-head);color:var(--head);font-variant-numeric:tabular-nums}
+.attn{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.attn li{display:flex;gap:12px;align-items:flex-start;padding:12px 14px;border:1px solid var(--line);border-radius:16px}
+.dot{width:9px;height:9px;border-radius:99px;flex:none;margin-top:7px}
+.attn button{margin-inline-start:auto;flex:none}
+
+/* lesson plan */
+.stack{display:flex;height:22px;border-radius:99px;overflow:hidden;gap:2px;margin:10px 0}
+.stack i{display:block;min-width:2px}
+.blk{display:grid;grid-template-columns:58px minmax(0,1fr);gap:10px;padding:8px 0;border-bottom:1px dashed var(--line)}
+.blk:last-child{border:0}
+.blk .m{font-variant-numeric:tabular-nums;font-weight:600;color:var(--head)}
+.chip{display:inline-block;font-size:11px;font-weight:600;padding:1px 9px;border-radius:99px;margin-inline-end:6px;color:#fff}
+h3.s{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--accent-ink);margin:18px 0 6px;font-family:var(--f-body);font-weight:600}
+ul.plain{margin:0;padding-inline-start:18px}
+.chk{display:flex;gap:10px;align-items:center;padding:6px 0;cursor:pointer}
+.chk input{width:17px;height:17px;accent-color:var(--accent)}
+.note{background:var(--surface2);border-radius:14px;padding:12px 16px;margin-top:6px}
+.meta{display:flex;flex-wrap:wrap;gap:6px 18px;color:var(--muted);font-size:12.5px;margin-top:6px}
+
+/* item analysis */
+.opts{display:grid;gap:8px;margin:12px 0}
+.opt{display:grid;grid-template-columns:24px minmax(0,1fr) 42px;gap:10px;align-items:center}
+.opt .track{height:18px;border-radius:99px}.opt .fill{border-radius:99px;background:#B6BBC4}
+.opt.right .fill{background:var(--good)}
+.thr{position:absolute;top:-3px;bottom:-3px;width:0;border-inline-start:2px dashed var(--muted);inset-inline-start:60%}
+
+/* nesting */
+.ring{display:flex;gap:12px;align-items:center}
+.pbar{height:8px;border-radius:99px;background:var(--surface2);overflow:hidden;min-width:70px}
+.pbar i{display:block;height:100%;background:var(--accent)}
+.gate{display:grid;gap:6px;margin:8px 0 14px}
+.gate div{display:flex;gap:8px;align-items:center}
+
+/* sync */
+.pipe{display:flex;gap:6px}
+.stg{border:1px solid var(--line);background:var(--surface2);color:var(--muted);padding:3px 11px;border-radius:99px;font-size:12px;font-weight:600}
+.stg.s1{background:var(--warn-soft);color:var(--warn);border-color:transparent}
+.stg.s2{background:var(--good-soft);color:var(--good);border-color:transparent}
+.cards{display:grid;gap:12px}
+.lcard{border:1px solid var(--line);border-radius:18px;padding:16px;display:grid;gap:8px}
+.lcard .q{font-weight:600;color:var(--head)}
+.ans{background:var(--surface2);border-radius:12px;padding:10px 14px}
+.form{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+.form input{flex:1 1 260px;min-width:0;padding:10px 16px;border-radius:32px;border:1px solid var(--line);background:var(--surface);color:var(--fg);font:inherit}
+.foot{color:var(--muted);font-size:12px;text-align:center;margin-top:8px}
+@media(prefers-reduced-motion:reduce){.fill{transition:none}}
+
+/* ---- scope bar, guides, brand views ---- */
+.hero{padding-block:clamp(24px,4vw,40px) clamp(20px,3vw,32px);margin-bottom:0}
+.heroctl{margin-top:16px}
+.scope{background:var(--surface2);border-bottom:1px solid var(--line)}
+.scopebar{display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px;padding-block:12px}
+.scopebar label{display:flex;align-items:center;gap:8px;font-weight:600;color:var(--head);font-size:12.5px}
+.scopebar select{font:inherit;font-weight:500;color:var(--head);background-color:var(--surface);border:1px solid var(--line);border-radius:9999px;padding:8px 34px 8px 14px;min-height:40px;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%23667085' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 13px center}
+[dir="rtl"] .scopebar select{padding:8px 14px 8px 34px;background-position:left 13px center}
+.showing{margin-inline-start:auto;color:var(--muted);font-size:12.5px}
+.showing b{color:var(--head)}
+.tabs button small{display:block;font-size:10.5px;font-weight:400;opacity:.75;line-height:1.15}
+.tabs button{line-height:1.25}
+main{padding-top:clamp(20px,3vw,28px)}
+.guide{background:var(--accent-soft);color:var(--head);border-radius:12px;padding:10px 14px;font-size:13px;max-width:78ch}
+.start summary{cursor:pointer;font:700 15px var(--f-head);color:var(--head);list-style:none}
+.start summary::-webkit-details-marker{display:none}
+.start summary::after{content:"\25BE";margin-inline-start:8px;color:var(--muted)}
+.start[open] summary{margin-bottom:14px}
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,200px),1fr));gap:12px}
+.step{background:var(--surface2);border-radius:14px;padding:14px}
+.step .n{width:26px;height:26px;border-radius:99px;background:var(--accent);color:#fff;display:grid;place-items:center;font-size:13px;margin-bottom:8px}
+.step h3{font-size:14px;margin-bottom:4px}
+.step p{margin:0;color:var(--muted);font-size:12.5px}
+table.hm{table-layout:fixed;min-width:420px}
+table.hm th.c{text-align:center}
+table.hm td{padding:4px}
+table.hm td.rh{width:26%}
+.lnk{border:0;background:transparent;padding:6px 4px;font:inherit;font-weight:600;color:var(--head);text-align:start;cursor:pointer;text-decoration:underline;text-decoration-color:var(--line);text-underline-offset:3px}
+table.hm th .lnk{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);text-align:center;width:100%}
+.cell{width:100%;border:0;border-radius:10px;padding:10px 6px;min-height:44px;font:600 14px var(--f-head);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px}
+.cell.on{outline:2px solid var(--accent);outline-offset:1px}
+.h-good{background:var(--good-soft);color:var(--good)}
+.h-mid{background:var(--surface2);color:var(--head)}
+.h-low{background:var(--warn-soft);color:var(--warn)}
+.vd{width:7px;height:7px;border-radius:99px;background:var(--warn);display:inline-block}
+tr.grp td{background:var(--surface2);font-weight:600;color:var(--head);font-size:11.5px;text-transform:uppercase;letter-spacing:.05em;padding:7px 10px}
+.bds{display:inline-flex;gap:3px;vertical-align:middle}
+.bd{width:9px;height:9px;border-radius:99px;background:var(--line);display:inline-block}
+.bd.ok{background:var(--good)}.bd.behind{background:var(--warn)}.bd.na{background:var(--line)}
+.bd.me{outline:2px solid var(--head);outline-offset:1px}
+.tagl{display:inline-block;font-size:11px;font-weight:600;padding:1px 9px;border-radius:99px;background:var(--surface2);color:var(--head);margin-inline-end:6px}
+.brow[data-act]{cursor:pointer}
+.brow.dim{opacity:.4}
+.empty{padding:22px 12px;text-align:center;color:var(--muted);margin:0}
+
+/* ---- responsive: laptop > 1280, tablet 721-900, mobile <= 720 ---- */
+@media(min-width:1280px){.wrap{max-width:1240px}}
+@media(max-width:900px){
+  .panel{border-radius:18px}
+  .tabs{width:100%;margin-inline:0}
+}
+@media(max-width:720px){
+  body{font-size:13px;line-height:1.5}
+  .hero{padding-block:24px 22px}
+  #deptseg{display:flex;width:100%}
+  #deptseg button{flex:1;padding:9px 6px;font-size:12.5px;line-height:1.25;white-space:normal;min-height:40px}
+  .heroctl{margin-top:18px}
+  .brand b{font-size:15px}
+  .tabs{gap:4px;padding-block:8px}
+  .tabs button{padding:9px 14px;min-height:40px}
+  main{padding-top:20px}
+  .head h1{font-size:22px}
+  .head p{font-size:13px}
+  .tiles{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .tile{padding:14px 14px 16px;border-radius:16px}
+  .tile .v{font-size:23px}
+  .panel{padding:16px;border-radius:16px}
+  .spreadbox b{font-size:26px}
+  .brow{grid-template-columns:62px minmax(0,1fr) 34px;gap:8px}
+  .axis{margin-inline:70px 42px}
+  .attn li{flex-wrap:wrap;gap:8px 12px}
+  .attn button{margin-inline-start:0;width:100%}
+  .blk{grid-template-columns:52px minmax(0,1fr)}
+  .btn{min-height:40px}
+  .chk{padding:10px 0}
+  .form input,.form .btn{flex:1 1 100%;min-height:42px}
+  .pipe{flex-wrap:wrap}
+  .lcard{padding:14px}
+  table{font-size:12.5px}
+  td{padding:9px 8px}
+  th{padding:8px}
+  table.stk tr:has(th){display:none}
+  table.stk tr{display:block;padding:12px 0;border-bottom:1px solid var(--line)}
+  table.stk tr:last-child{border-bottom:0}
+  table.stk td{display:block;border:0;padding:4px 0}
+}
+@media(max-width:1024px){.tabs button,.seg button,.btn{min-height:40px}}
+@media(max-width:720px){
+  .scopebar{gap:10px}
+  .scopebar label{flex:1 1 calc(50% - 6px);flex-direction:column;align-items:stretch;gap:4px}
+  .scopebar select{width:100%}
+  .showing{margin:0;flex-basis:100%}
+  .tabs button small{display:none}
+  .guide{font-size:12.5px}
+  table.hm td.rh{width:30%}
+}
+@media(max-width:340px){.tiles{grid-template-columns:minmax(0,1fr)}}
+</style>
+
+<header class="top"><div class="wrap topbar">
+  <div class="brand"><span class="mk">SST</span><b>Delivery Hero</b></div>
+  <div class="seg" id="langseg" role="group" aria-label="Language">
+      <button data-lang="en" type="button">EN</button><button data-lang="ar" type="button">عربي</button>
+    </div>
+</div></header>
+<section class="hero"><div class="wrap">
+  <h1 class="hname" id="appname"></h1>
+  <p class="tag" id="tagline"></p>
+  <div class="heroctl"><span class="demo" id="demo"></span></div>
+</div></section>
+<div class="navwrap"><nav class="tabs wrap" id="tabs"></nav></div>
+<div class="scope"><div class="wrap scopebar" id="scope"></div></div>
+<main class="wrap" id="app"></main>
+
+<script>
+const L=(en,ar)=>({en,ar});
+let lang='en';try{lang=localStorage.getItem('th-lang')||'en'}catch(e){}
+const t=x=>typeof x==='string'?x:x[lang];
+const U={
+ app:['Single Source of Training','المصدر الموحد للتدريب'],tag:['One curriculum and one knowledge base for six brands.','منهج واحد وقاعدة معرفة واحدة لستة براندات.'],demo:['Demo data','بيانات تجريبية'],
+ dash:['Dashboard','لوحة المتابعة'],cur:['Curriculum','المنهج'],asm:['Assessments','الاختبارات'],nest:['Nesting','النيستج'],sync:['Sync & Learning Log','المزامنة وسجل التعلّم'],
+ d_t:['Same training, whoever delivers it','نفس التدريب، أياً كان المدرّب'],
+ d_s:['Every trainer and entity teaches the same content, tests the same way, and learns from the same incidents. This view shows whether that is true.','كل مدرّب وكل فرع يقدّم نفس المحتوى ويختبر بنفس الطريقة ويتعلّم من نفس الحوادث. هذه الشاشة تُظهر هل هذا يحدث فعلاً.'],
+ k_spread:['Score gap between trainers','فجوة الدرجات بين المدرّبين'],k_pass:['First-attempt pass rate','النجاح من أول محاولة'],k_ttp:['Time to proficiency','الوقت للوصول للكفاءة'],
+ k_nest:['Nesting graduation','التخرّج من النيستج'],k_kb:['KB articles in date','مقالات القاعدة المحدّثة'],k_sla:['SOP changes synced on time','تغييرات الإجراءات المزامَنة في موعدها'],
+ pts:['pts','نقطة'],days:['days','يوم'],vsb:['vs baseline','مقارنة بالبداية'],
+ tc:['Trainer consistency','اتساق المدرّبين'],tc_s:['Average assessment score per trainer. The line marks the team average.','متوسط درجة الاختبار لكل مدرّب. الخط يمثّل متوسط الفريق.'],
+ base:['Baseline','قبل التوحيد'],now:['Standardised','بعد التوحيد'],gap:['Gap between highest and lowest','الفرق بين الأعلى والأقل'],
+ ent:['Entities','الفروع'],ent_s:['Which entities teach the latest approved version.','أي فروع تدرّس أحدث نسخة معتمدة.'],
+ entity:['Entity','الفرع'],score:['Avg score','متوسط الدرجة'],ver:['Version in use','النسخة المستخدمة'],kb:['KB fresh','تحديث القاعدة'],status:['Status','الحالة'],
+ latest:['Latest','الأحدث'],behind:['Behind','متأخر'],
+ attn:['Needs attention','يحتاج متابعة'],open:['Open','فتح'],
+ a_q:['Item analysis: only {n}% answered correctly: "{q}"','تحليل الأسئلة: {n}% فقط أجابوا صح: "{q}"'],
+ a_s:['SOP change {id} is overdue: {t}','تغيير الإجراء {id} متأخر: {t}'],
+ a_n:['{n} is ready for sign-off but not signed yet','{n} جاهز للاعتماد ولم يُعتمد بعد'],
+ a_m:['{id} is waiting for QA review before release','{id} ينتظر مراجعة الجودة قبل الإصدار'],
+ c_t:['Curriculum library','مكتبة المنهج'],c_s:['One version-controlled source for every trainer in every entity. Open a module to see its lesson plan and release checks.','مصدر واحد بنظام الإصدارات لكل المدرّبين في كل الفروع. افتح أي موديول لترى خطة الدرس وفحوصات الإصدار.'],
+ module:['Module','الموديول'],owner:['Owner','المسؤول'],adopt:['Entities on latest','الفروع على الأحدث'],
+ live:['Live','مفعّل'],review:['In QA review','قيد المراجعة'],
+ lp:['Lesson plan','خطة الدرس'],obj:['Learning objectives','أهداف التعلّم'],flow:['Session flow','مسار الجلسة'],fg:['Facilitator guide','دليل المدرّب'],
+ qa:['Release checks','فحوصات الإصدار'],qa_s:['A plan goes live only when every check passes.','لا تُفعَّل الخطة إلا بعد اجتياز كل الفحوصات.'],
+ approve:['Approve for release','اعتماد الإصدار'],released:['Released to all entities','تم الإصدار لكل الفروع'],
+ cl:['Change log','سجل التغييرات'],eff:['Effective','ساري من'],min:['min','د'],
+ t_open:['Open','افتتاح'],t_present:['Present','شرح'],t_practice:['Practice','تطبيق'],t_check:['Knowledge check','اختبار سريع'],
+ b_open:['Welcome and objectives','الترحيب والأهداف'],b_check:['Knowledge check (5 questions)','اختبار سريع (5 أسئلة)'],b_wrap:['Recap and link to nesting','ملخص وربط بالنيستج'],
+ q1:['Learning objectives are measurable','أهداف التعلّم قابلة للقياس'],q2:['Timing adds up to the session length','التوقيت يطابق مدة الجلسة'],q3:['Knowledge check is included','يتضمن اختباراً سريعاً'],
+ q4:['Practice exercise is included','يتضمن تمريناً تطبيقياً'],q5:['Facilitator guide is complete','دليل المدرّب مكتمل'],q6:['Matches the latest SOP and KB articles','مطابق لآخر إجراء ومقالات القاعدة'],
+ cl1:['Aligned with latest SOP change','مواءمة مع آخر تغيير في الإجراء'],cl2:['Added practice case and knowledge check','إضافة حالة تطبيقية واختبار سريع'],cl3:['Retired: superseded by the version above','أُلغيت: حلّت محلها النسخة أعلاه'],
+ as_t:['Assessment centre','مركز الاختبارات'],as_s:['Results by question show where the content is unclear, not where agents are weak.','النتائج لكل سؤال تُظهر أين المحتوى غير واضح، لا أين ضعف المتعلمين.'],
+ as_avg:['Average score','متوسط الدرجة'],as_pass:['Pass rate','نسبة النجاح'],as_flag:['Questions flagged','أسئلة تحتاج مراجعة'],
+ question:['Question','السؤال'],correct:['Answered correctly','الإجابة الصحيحة'],flag:['Content gap','فجوة في المحتوى'],ok:['On track','سليم'],
+ dist:['How trainees answered','توزيع الإجابات'],thr:['Dashed line: 60% review threshold','الخط المتقطع: حدّ المراجعة 60%'],
+ ok_ins:['Performing as expected. No content change needed.','الأداء كما هو متوقع. لا حاجة لتعديل المحتوى.'],
+ mkfix:['Create content fix','إنشاء مهمة تعديل'],fixed:['Fix task sent to the curriculum backlog','أُرسلت مهمة التعديل لقائمة المنهج'],
+ n_t:['Nesting readiness','جاهزية النيستج'],n_s:['Every trainee is released to production against the same checklist and the same gate.','يُفرَج عن كل متدرّب للإنتاج وفق نفس القائمة ونفس البوابة.'],
+ trainee:['Trainee','المتدرّب'],progress:['Checklist','القائمة'],week:['Week','الأسبوع'],gate:['Release gate','بوابة الإفراج'],
+ g1:['Checklist complete','القائمة مكتملة'],g2:['Assessment score of 80 or more','درجة الاختبار 80 أو أكثر'],g3:['QA score of 85 or more','درجة الجودة 85 أو أكثر'],
+ signoff:['Sign off for production','اعتماد للإنتاج'],signed:['Signed off','تم الاعتماد'],ready:['Ready','جاهز'],blocked:['Blocked','متوقف'],inprog:['In progress','قيد التنفيذ'],
+ s_t:['Sync and learning log','المزامنة وسجل التعلّم'],s_s:['Track every SOP change from source to KB, LMS and Copilot, and share what trainers learn in class.','تتبّع كل تغيير في الإجراءات من المصدر حتى القاعدة والـLMS والـCopilot، وشارك ما يتعلمه المدرّبون في الفصل.'],
+ t_sync:['SOP change sync','مزامنة تغييرات الإجراءات'],t_log:['Shared learning log','سجل التعلّم المشترك'],
+ chg:['Change','التغيير'],src:['Source','المصدر'],pipe:['Pipeline (click to advance)','المسار (اضغط للتقدّم)'],due:['Due','الموعد'],
+ late:['{n}d overdue','متأخر {n} يوم'],in_d:['in {n}d','بعد {n} يوم'],closed:['Closed','مغلق'],
+ new_q:['What did a trainee ask in class that the content did not answer?','ما الذي سأله متدرّب في الفصل ولم يجب عنه المحتوى؟'],add:['Log question','تسجيل السؤال'],
+ st_new:['Awaiting answer','بانتظار الإجابة'],st_app:['Answer approved','الإجابة معتمدة'],st_bc:['Sent to all trainers','أُرسلت لكل المدرّبين'],
+ approve_a:['Approve answer','اعتماد الإجابة'],broadcast:['Send to all trainers','إرسال لكل المدرّبين'],ack:['acknowledged','أكدوا الاستلام'],
+ raised:['Raised by {n} in {e}','سجّلها {n} في {e}'],pend_ans:['The curriculum owner has not answered yet.','لم يردّ مسؤول المنهج بعد.'],
+ foot:['Prototype with fictional data. Built to show the approach, not to report real results.','نموذج أولي ببيانات خيالية. الهدف عرض الفكرة وليس عرض نتائج حقيقية.']
+};
+const u=(k,v)=>{let s=U[k][lang==='en'?0:1];if(v)for(const a in v)s=s.replace('{'+a+'}',v[a]);return s};
+
+const ENT=[L('talabat','talabat'),L('HungerStation','HungerStation'),L('Glovo','Glovo'),L('PedidosYa','PedidosYa'),L('foodpanda','foodpanda'),L('Baemin','Baemin')];
+const TR=[L('Omar','عمر'),L('Salma','سلمى'),L('Karim','كريم'),L('Nour','نور'),L('Youssef','يوسف'),L('Mariam','مريم')];
+const TN=[L('Hana','هنا'),L('Ali','علي'),L('Laila','ليلى'),L('Tarek','طارق')];
+const DEPTS=['cs','rd','vd'];
+
+function mod(id,name,ver,status,owner,date,adopt,concept,activity,objs,checks){return{id,name,ver,status,owner,date,adopt,concept,activity,objs,checks}}
+const OW=['Dina','Mostafa','Rana'];
+const DATA={
+cs:{name:L('Customer Service','خدمة العملاء'),
+ base:[72,88,65,81,92,70],cur:[84,87,82,86,88,83],pass:[61,86],ttp:[34,26],nest:91,kb:88,sla:94,
+ entScore:[85,83,79,86,81,76],entVer:[1,1,1,1,0,0],entKb:[93,90,84,91,82,74],
+ mods:[
+  mod('CS-101',L('Order status and delivery issues','حالة الطلب ومشاكل التوصيل'),'v2.4','live',OW[0],'01 Nov 2026',4,L('Where to read live order status, and which fault code applies to each delay type.','أين تقرأ حالة الطلب الحيّة، وأي كود مسؤولية ينطبق على كل نوع تأخير.'),L('Pairs classify six late-order cases using the fault-code decision table.','أزواج تصنّف ست حالات تأخير باستخدام جدول قرار كود المسؤولية.'),[L('Locate live order status in under 20 seconds','تحديد حالة الطلب الحيّة في أقل من 20 ثانية'),L('Select the correct fault code in 5 of 6 cases','اختيار كود المسؤولية الصحيح في 5 من 6 حالات')],[1,1,1,1,1,1]),
+  mod('CS-102',L('Refunds and compensation','الاسترداد والتعويض'),'v3.1','live',OW[0],'12 Nov 2026',4,L('The three compensation tiers and the difference between a refund and a voucher.','مستويات التعويض الثلاثة والفرق بين الاسترداد والقسيمة.'),L('Role-play: calm a customer while applying the right tier.','لعب أدوار: تهدئة العميل مع تطبيق المستوى الصحيح.'),[L('Apply the correct compensation tier','تطبيق مستوى التعويض الصحيح'),L('Explain refund versus voucher in one sentence','شرح الفرق بين الاسترداد والقسيمة في جملة واحدة')],[1,1,1,1,1,1]),
+  mod('CS-103',L('Working with Copilot','العمل مع Copilot'),'v1.2','review',OW[1],'20 Nov 2026',0,L('What Copilot suggests, what it cannot decide, and when to override.','ما الذي يقترحه Copilot وما لا يستطيع حسمه ومتى تتجاوزه.'),L('Sandbox: handle five contacts where Copilot is right and two where it is not.','بيئة تجريبية: التعامل مع خمس حالات يصيب فيها Copilot واثنتين يخطئ فيهما.'),[L('Accept or override a Copilot suggestion with a reason','قبول اقتراح Copilot أو تجاوزه مع ذكر السبب'),L('Escalate refunds above personal limit','تصعيد الاسترداد الأعلى من الحد الشخصي')],[1,1,1,1,0,0]),
+  mod('CS-104',L('De-escalation and tone','تهدئة العميل ونبرة الحديث'),'v2.0','live',OW[2],'05 Oct 2026',5,L('Acknowledge, own, and offer the next step in three sentences.','الاعتراف بالمشكلة وتحمّل المسؤولية وتقديم الخطوة التالية في ثلاث جمل.'),L('Listen to three recorded calls and rewrite the weakest reply.','الاستماع إلى ثلاث مكالمات مسجّلة وإعادة كتابة أضعف رد.'),[L('Use the acknowledge, own, offer structure','استخدام هيكل: اعتراف، مسؤولية، عرض'),L('Remove blame language from replies','حذف عبارات اللوم من الردود')],[1,1,1,1,1,1])],
+ qs:[
+  {q:L('An order arrived 45 minutes late. Which compensation tier applies?','وصل الطلب متأخراً 45 دقيقة. ما مستوى التعويض المناسب؟'),m:'CS-102',c:46,d:[18,46,26,10],r:1,ins:L('26% chose the higher tier. The lesson plan lists tiers in a table but has no practice case.','اختار 26% المستوى الأعلى. خطة الدرس تعرض المستويات في جدول بدون حالة تطبيقية.')},
+  {q:L('Where do you check live order status first?','أين تتحقق من حالة الطلب الحيّة أولاً؟'),m:'CS-101',c:91,d:[91,4,3,2],r:0},
+  {q:L('Copilot suggests a refund above your limit. What do you do?','يقترح Copilot استرداداً أعلى من حدّك. ماذا تفعل؟'),m:'CS-103',c:58,d:[58,27,9,6],r:0,ins:L('27% approved it. The module is still in review, so trainers are improvising this rule.','27% وافقوا عليه. الموديول ما زال قيد المراجعة فالمدرّبون يجتهدون في هذه القاعدة.')},
+  {q:L('Which phrase best acknowledges a frustrated customer?','أي عبارة تعترف بإحباط العميل بشكل أفضل؟'),m:'CS-104',c:84,d:[6,84,7,3],r:1},
+  {q:L('When is an order marked as vendor fault?','متى يُسجَّل الطلب كخطأ من المطعم؟'),m:'CS-101',c:52,d:[11,52,29,8],r:1,ins:L('The KB article changed on 12 Nov, but the lesson plan still teaches the old rule.','تغيّرت مقالة القاعدة في 12 نوفمبر لكن خطة الدرس ما زالت تُدرّس القاعدة القديمة.')}],
+ nestItems:[L('Shadow 10 live chats with a mentor','مراقبة 10 محادثات مباشرة مع المرشد'),L('Finish the Copilot sandbox tasks','إنهاء مهام Copilot التجريبية'),L('Handle 15 contacts with mentor on the line','التعامل مع 15 حالة والمرشد متصل'),L('Apply refund policy correctly in 5 cases','تطبيق سياسة الاسترداد بشكل صحيح في 5 حالات'),L('Handle 30 contacts independently','التعامل مع 30 حالة باستقلالية'),L('Score 85 or more on 10 QA-reviewed contacts','تحقيق 85 أو أكثر في 10 حالات خاضعة للجودة')],
+ trainees:[{n:0,e:0,done:6,as:88,qa:91},{n:1,e:1,done:6,as:84,qa:79},{n:2,e:4,done:4,as:90,qa:86},{n:3,e:2,done:2,as:76,qa:0}],
+ sync:[
+  {id:'SYN-2041',t:L('Late-order compensation tiers updated','تحديث مستويات تعويض التأخير'),s:L('Process Enhancement','تحسين العمليات'),due:2,st:[2,1,0]},
+  {id:'SYN-2038',t:L('Copilot refund limit raised for tier-2 agents','رفع حد الاسترداد في Copilot لمستوى الوكلاء الثاني'),s:L('OPEX','OPEX'),due:5,st:[2,2,1]},
+  {id:'SYN-2033',t:L('New vendor-fault definition','تعريف جديد لخطأ المطعم'),s:L('Operations Excellence','التميّز التشغيلي'),due:-1,st:[2,0,0]}],
+ log:[
+  {q:L("Does a partial refund count as compensation?",'هل الاسترداد الجزئي يُحتسب تعويضاً؟'),e:0,tr:1,a:L('No. A partial refund corrects the order. Compensation is a separate voucher. See KB article CS-212.','لا. الاسترداد الجزئي تصحيح للطلب. التعويض قسيمة منفصلة. راجع مقالة القاعدة CS-212.'),s:2,ack:[5,6]},
+  {q:L('Can agents offer a voucher when the rider is at fault?','هل يستطيع الوكيل تقديم قسيمة عندما يكون الخطأ من المندوب؟'),e:3,tr:3,a:null,s:0,ack:[0,6]}]},
+rd:{name:L('Rider','المناديب'),
+ base:[68,90,74,83,64,79],cur:[83,88,82,86,81,85],pass:[58,84],ttp:[30,22],nest:89,kb:85,sla:91,
+ entScore:[84,86,80,82,78,75],entVer:[1,1,1,0,1,0],entKb:[90,92,83,79,86,71],
+ mods:[
+  mod('RD-101',L('Rider accounts and onboarding','حسابات المناديب والانضمام'),'v2.2','live',OW[1],'28 Oct 2026',5,L('Documents required, account states, and who can unblock a rider.','المستندات المطلوبة وحالات الحساب ومن يستطيع فكّ الإيقاف.'),L('Sort twelve onboarding cases into approve, wait, or escalate.','تصنيف اثنتي عشرة حالة انضمام: موافقة أو انتظار أو تصعيد.'),[L('Name every document required at onboarding','ذكر كل المستندات المطلوبة عند الانضمام'),L('Route blocked accounts to the right team','توجيه الحسابات الموقوفة للفريق الصحيح')],[1,1,1,1,1,1]),
+  mod('RD-102',L('Delays and order reassignment','التأخير وإعادة إسناد الطلبات'),'v3.0','live',OW[0],'14 Nov 2026',3,L('When reassignment is automatic, when it is manual, and what the rider sees.','متى تكون إعادة الإسناد تلقائية ومتى يدوية وما الذي يراه المندوب.'),L('Timeline exercise: place seven delay events on the reassignment clock.','تمرين خط زمني: وضع سبعة أحداث تأخير على ساعة إعادة الإسناد.'),[L('State the reassignment threshold from memory','ذكر حد إعادة الإسناد من الذاكرة'),L('Choose manual or automatic reassignment correctly','اختيار الإسناد اليدوي أو التلقائي بشكل صحيح')],[1,1,1,1,1,1]),
+  mod('RD-103',L('Safety incidents','حوادث السلامة'),'v1.5','review',OW[2],'22 Nov 2026',0,L('First response, escalation path, and what to record after an incident.','الاستجابة الأولى ومسار التصعيد وما يُسجَّل بعد الحادث.'),L('Simulation: three incident calls with an observer scoring each step.','محاكاة: ثلاث مكالمات حوادث مع مراقب يقيّم كل خطوة.'),[L('Follow the first-response script','اتباع نص الاستجابة الأولى'),L('Escalate within the required time','التصعيد خلال الوقت المطلوب')],[1,1,1,0,1,0]),
+  mod('RD-104',L('Payouts and earnings disputes','المدفوعات ونزاعات الأرباح'),'v2.1','live',OW[1],'09 Oct 2026',4,L('Which report proves a payout, and how to explain a deduction.','أي تقرير يثبت الدفعة وكيف تشرح الخصم.'),L('Reconcile three payout statements and write the reply.','مطابقة ثلاثة كشوف دفعات وكتابة الرد.'),[L('Open the correct payout report first time','فتح تقرير الدفعات الصحيح من أول مرة'),L('Explain a deduction in plain language','شرح الخصم بلغة بسيطة')],[1,1,1,1,1,1])],
+ qs:[
+  {q:L('A rider reports a road accident. What is the first action?','أبلغ مندوب عن حادث على الطريق. ما أول إجراء؟'),m:'RD-103',c:63,d:[63,21,10,6],r:0},
+  {q:L('When is an order reassigned automatically?','متى يُعاد إسناد الطلب تلقائياً؟'),m:'RD-102',c:55,d:[14,55,23,8],r:1,ins:L('Trainers in two entities still teach the old 15 minute threshold. The new value is 12.','مدرّبون في فرعين ما زالوا يُدرّسون الحد القديم 15 دقيقة. القيمة الجديدة 12.')},
+  {q:L("A rider disputes yesterday's payout. Which report do you open?",'اعترض مندوب على دفعة الأمس. أي تقرير تفتح؟'),m:'RD-104',c:49,d:[25,18,49,8],r:2,ins:L('Report names changed in the last release. Screenshots in the lesson plan are out of date.','تغيّرت أسماء التقارير في آخر إصدار. لقطات الشاشة في خطة الدرس قديمة.')},
+  {q:L('Which documents are required at onboarding?','ما المستندات المطلوبة عند الانضمام؟'),m:'RD-101',c:88,d:[4,88,5,3],r:1},
+  {q:L('How long before a delayed pickup triggers an alert?','كم المدة قبل أن ينبّه تأخر الاستلام؟'),m:'RD-102',c:72,d:[72,12,10,6],r:0}],
+ nestItems:[L('Shadow 10 rider-support tickets','مراقبة 10 تذاكر دعم مناديب'),L('Complete the admin tool walkthrough','إنهاء جولة أداة الإدارة'),L('Resolve 15 reassignment cases with review','حل 15 حالة إعادة إسناد مع مراجعة'),L('Handle 3 safety escalations in simulation','التعامل مع 3 تصعيدات سلامة في المحاكاة'),L('Resolve 30 tickets independently','حل 30 تذكرة باستقلالية'),L('Payout dispute accuracy of 95% or more','دقة نزاعات الدفعات 95% أو أكثر')],
+ trainees:[{n:1,e:0,done:6,as:92,qa:90},{n:2,e:3,done:6,as:81,qa:80},{n:0,e:1,done:3,as:85,qa:0},{n:3,e:5,done:1,as:70,qa:0}],
+ sync:[
+  {id:'SYN-3012',t:L('Safety incident escalation path changed','تغيير مسار تصعيد حوادث السلامة'),s:L('Operations Excellence','التميّز التشغيلي'),due:3,st:[2,1,0]},
+  {id:'SYN-3007',t:L('Auto-reassignment threshold moved from 15 to 12 minutes','تغيير حد إعادة الإسناد التلقائي من 15 إلى 12 دقيقة'),s:L('Process Enhancement','تحسين العمليات'),due:-2,st:[2,2,0]},
+  {id:'SYN-2999',t:L('Payout cutoff moved to Tuesday','نقل موعد إغلاق الدفعات ليوم الثلاثاء'),s:L('OPEX','OPEX'),due:6,st:[1,0,0]}],
+ log:[
+  {q:L('Can a rider change the drop-off address after pickup?','هل يستطيع المندوب تغيير عنوان التسليم بعد الاستلام؟'),e:1,tr:0,a:L('No. Contact the customer through support. The address stays locked after pickup. See KB article RD-140.','لا. يتم التواصل مع العميل عبر الدعم. العنوان مقفل بعد الاستلام. راجع مقالة القاعدة RD-140.'),s:1,ack:[2,6]},
+  {q:L('What is the response time for a minor accident report?','ما زمن الاستجابة عند بلاغ حادث بسيط؟'),e:4,tr:4,a:null,s:0,ack:[0,6]}]},
+vd:{name:L('Vendor','المطاعم والشركاء'),
+ base:[70,86,78,63,89,74],cur:[84,86,83,81,87,84],pass:[63,87],ttp:[28,21],nest:93,kb:90,sla:96,
+ entScore:[86,84,82,85,80,78],entVer:[1,1,1,1,1,0],entKb:[94,91,88,90,85,76],
+ mods:[
+  mod('VD-101',L('Menu and availability','القائمة والتوافر'),'v2.3','live',OW[2],'30 Oct 2026',5,L('Where menu changes live, how long they take, and what vendors can self-serve.','أين تُنفَّذ تغييرات القائمة وكم تستغرق وما الذي يستطيع المطعم فعله بنفسه.'),L('Update a sample menu in the training portal against a checklist.','تحديث قائمة تجريبية في بوابة التدريب وفق قائمة تحقق.'),[L('Mark items unavailable and confirm the sync','تعليم الأصناف غير متاحة وتأكيد المزامنة'),L('Use the bulk upload template','استخدام نموذج الرفع الجماعي')],[1,1,1,1,1,1]),
+  mod('VD-102',L('Order issues and missing items','مشاكل الطلبات والأصناف الناقصة'),'v1.9','live',OW[0],'11 Nov 2026',4,L('Who is at fault for a missing item and what evidence closes the case.','من المسؤول عن الصنف الناقص وما الدليل الذي يغلق الحالة.'),L('Case file: decide fault on six missing-item claims.','ملف حالات: تحديد المسؤولية في ست مطالبات أصناف ناقصة.'),[L('Assign the correct fault code','تحديد كود المسؤولية الصحيح'),L('Request the right evidence from the vendor','طلب الدليل الصحيح من المطعم')],[1,1,1,1,1,1]),
+  mod('VD-103',L('Payments and invoices','المدفوعات والفواتير'),'v2.0','review',OW[1],'18 Nov 2026',0,L('Invoice periods, cutoff dates, and how to explain a short payment.','فترات الفواتير ومواعيد الإغلاق وكيف تشرح دفعة ناقصة.'),L('Reconcile two invoices and draft the vendor reply.','مطابقة فاتورتين وصياغة رد للمطعم.'),[L('State the current invoice cutoff','ذكر موعد إغلاق الفاتورة الحالي'),L('Explain a short payment with evidence','شرح دفعة ناقصة بالدليل')],[1,1,1,1,0,0]),
+  mod('VD-104',L('Tablet and app troubleshooting','حل مشاكل الجهاز والتطبيق'),'v1.6','live',OW[2],'02 Oct 2026',5,L('A five-step check from power to connectivity to app version.','فحص من خمس خطوات من الطاقة إلى الاتصال إلى نسخة التطبيق.'),L('Fix four pre-broken tablets in the lab.','إصلاح أربعة أجهزة معطّلة مسبقاً في المعمل.'),[L('Run the five-step check in order','تنفيذ الفحص بخمس خطوات بالترتيب'),L('Know when to escalate to field support','معرفة متى يُصعَّد للدعم الميداني')],[1,1,1,1,1,1])],
+ qs:[
+  {q:L('A vendor marks an item unavailable. Where does it update?','يعلّم المطعم صنفاً غير متاح. أين يتحدّث؟'),m:'VD-101',c:79,d:[79,10,7,4],r:0},
+  {q:L('A customer reports a missing item. Which fault code applies?','أبلغ عميل عن صنف ناقص. أي كود مسؤولية ينطبق؟'),m:'VD-102',c:57,d:[15,57,20,8],r:1,ins:L('The claim window was extended last month. Trainers disagree on the evidence rule.','تم تمديد مدة المطالبة الشهر الماضي. المدرّبون مختلفون في قاعدة الدليل.')},
+  {q:L('What is the invoice period cutoff?','ما موعد إغلاق فترة الفاتورة؟'),m:'VD-103',c:67,d:[8,67,17,8],r:1},
+  {q:L('The tablet shows no new orders. What is the first step?','لا يعرض الجهاز طلبات جديدة. ما أول خطوة؟'),m:'VD-104',c:90,d:[90,4,4,2],r:0},
+  {q:L('Which file format does bulk menu upload accept?','ما صيغة الملف التي يقبلها الرفع الجماعي للقائمة؟'),m:'VD-101',c:51,d:[51,22,19,8],r:0,ins:L('Template v3 changed the column order. The lesson plan still shows v2.','النموذج v3 غيّر ترتيب الأعمدة. خطة الدرس ما زالت تعرض v2.')}],
+ nestItems:[L('Shadow 10 vendor calls','مراقبة 10 مكالمات مطاعم'),L('Complete the portal and tablet lab','إنهاء معمل البوابة والجهاز'),L('Update 10 menus with a mentor check','تحديث 10 قوائم مع مراجعة المرشد'),L('Handle 8 missing-item cases','التعامل مع 8 حالات أصناف ناقصة'),L('Handle 25 vendor contacts independently','التعامل مع 25 حالة مطعم باستقلالية'),L('Invoice query accuracy of 95% or more','دقة استفسارات الفواتير 95% أو أكثر')],
+ trainees:[{n:2,e:2,done:6,as:90,qa:92},{n:3,e:1,done:5,as:83,qa:88},{n:1,e:0,done:6,as:78,qa:90},{n:0,e:5,done:2,as:80,qa:0}],
+ sync:[
+  {id:'SYN-4120',t:L('Bulk menu upload template v3','نموذج الرفع الجماعي للقائمة v3'),s:L('Process Enhancement','تحسين العمليات'),due:1,st:[2,2,1]},
+  {id:'SYN-4115',t:L('Missing-item claim window extended','تمديد مدة مطالبة الأصناف الناقصة'),s:L('Operations Excellence','التميّز التشغيلي'),due:-3,st:[2,1,0]},
+  {id:'SYN-4109',t:L('New invoice cutoff date','موعد إغلاق جديد للفواتير'),s:L('OPEX','OPEX'),due:4,st:[0,0,0]}],
+ log:[
+  {q:L('Can a vendor reopen a closed missing-item claim?','هل يستطيع المطعم إعادة فتح مطالبة صنف ناقص مغلقة؟'),e:2,tr:2,a:L('Yes, within 48 hours with new evidence. After that, escalate to the entity lead. See KB article VD-077.','نعم خلال 48 ساعة بدليل جديد. بعد ذلك يُصعَّد لقائد الفرع. راجع مقالة القاعدة VD-077.'),s:2,ack:[6,6]},
+  {q:L('Does the new cutoff apply to invoices already issued?','هل ينطبق الموعد الجديد على الفواتير الصادرة؟'),e:1,tr:5,a:null,s:0,ack:[0,6]}]}
+};
+
+Object.assign(U,{
+ ov:['Overview','نظرة عامة'],ov_s:['Where we stand','الوضع الحالي'],cur_s:['What we teach','ما ندرّسه'],asm_s:['Is it working?','هل ينجح؟'],nest_s:['Ready for production?','جاهز للإنتاج؟'],sync_s:['What changed','ما الذي تغيّر'],
+ sync:['Changes and learning','التغييرات والتعلّم'],
+ sc_brand:['Brand','البراند'],sc_lob:['Line of business','خط العمل'],sc_all_b:['All brands','كل البراندات'],sc_all_l:['All lines of business','كل خطوط العمل'],sc_show:['Showing','العرض الحالي'],sc_reset:['Reset','إعادة ضبط'],
+ how:['How to use','طريقة الاستخدام'],
+ ov_t:['Global overview','نظرة عامة عالمية'],ov_d:['One curriculum, one knowledge base, six brands. See where each brand and line of business stands.','منهج واحد وقاعدة معرفة واحدة وستة براندات. شاهد وضع كل براند وكل خط عمل.'],
+ ov_h:['Pick a brand or line of business above, or click a cell in the table below. Every screen follows your choice.','اختر براند أو خط عمل من الأعلى، أو اضغط أي خانة في الجدول. كل الشاشات تتبع اختيارك.'],
+ start:['Start here: how this tool works','ابدأ من هنا: كيف تعمل الأداة'],
+ s1t:['Choose your scope','حدّد النطاق'],s1:['Pick a brand and a line of business at the top.','اختر براند وخط عمل من الأعلى.'],
+ s2t:['Find the gap','اعثر على الفجوة'],s2:['Overview shows which brand is behind. Assessments shows which lesson is unclear.','نظرة عامة تُظهر أي براند متأخر، والاختبارات تُظهر أي درس غير واضح.'],
+ s3t:['Fix the content','أصلح المحتوى'],s3:['Curriculum holds the one approved version of every lesson plan.','المنهج يحتوي النسخة المعتمدة الوحيدة لكل خطة درس.'],
+ s4t:['Track the rollout','تابع التطبيق'],s4:['Changes shows each SOP change reaching the KB, LMS, Copilot and every brand.','التغييرات تُظهر وصول كل تغيير للقاعدة والـLMS والـCopilot وكل براند.'],
+ matrix:['Brands and lines of business','البراندات وخطوط العمل'],matrix_s:['Average assessment score. An amber dot means the brand is behind on the latest content. Click a cell to focus.','متوسط درجة الاختبار. النقطة البرتقالية تعني أن البراند متأخر عن أحدث محتوى. اضغط خانة للتركيز.'],
+ all_lines:['All lines','كل الخطوط'],
+ k_gap:['Gap between brands','الفجوة بين البراندات'],k_score:['Average score','متوسط الدرجة'],k_latest:['On the latest version','على أحدث نسخة'],
+ bc_t:['Consistency across brands','الاتساق بين البراندات'],bc_s:['Average score per brand. The line marks the average. Click a brand to focus.','متوسط الدرجة لكل براند. الخط يمثّل المتوسط. اضغط براند للتركيز.'],
+ bt_t:['Brand status','حالة البراندات'],bt_s:['Score, content version and knowledge base freshness per brand.','الدرجة ونسخة المحتوى وحداثة قاعدة المعرفة لكل براند.'],bt_v:['Content','المحتوى'],
+ a_b:['{b} is behind on the latest content in {l}','{b} متأخر عن أحدث محتوى في {l}'],none:['Nothing needs attention in this scope.','لا شيء يحتاج متابعة في هذا النطاق.'],
+ cu_t:['Curriculum library','مكتبة المنهج'],cu_d:['One version-controlled lesson plan per module. Every brand teaches from this library.','خطة درس واحدة بنظام الإصدارات لكل موديول. كل البراندات تدرّس من هذه المكتبة.'],
+ cu_h:['Click a module to read its lesson plan, see which brands use the latest version, and approve it for release.','اضغط موديول لتقرأ خطة درسه وتعرف أي براندات تستخدم أحدث نسخة وتعتمد إصداره.'],
+ brands_latest:['Brands on latest','البراندات على الأحدث'],rollout:['Rollout by brand','التطبيق حسب البراند'],s_ok:['On latest','على الأحدث'],s_beh:['Behind','متأخر'],s_na:['Not released','لم يُصدر'],
+ as_t:['Assessment results','نتائج الاختبارات'],as_d:['Results by question show where the content is unclear, not where agents are weak.','النتائج لكل سؤال تُظهر أين المحتوى غير واضح، لا أين ضعف المتعلمين.'],
+ as_h:['Questions are sorted weakest first. Click one to see how each brand answered and to create a content fix.','الأسئلة مرتبة من الأضعف. اضغط سؤالاً لترى إجابة كل براند وتنشئ مهمة تعديل.'],bybrand:['By brand','حسب البراند'],
+ n_d:['Every trainee is released to production against the same checklist and the same gate, in every brand.','يُفرَج عن كل متدرّب للإنتاج وفق نفس القائمة ونفس البوابة في كل براند.'],
+ n_h:['Pick a trainee to see their checklist. Sign-off unlocks only when all three gate conditions pass.','اختر متدرباً لترى قائمته. لا يُفتح الاعتماد إلا عند تحقق شروط البوابة الثلاثة.'],lob:['Line','الخط'],
+ empty:['Nothing matches this brand and line of business. Use Reset to widen the scope.','لا يوجد ما يطابق هذا البراند وخط العمل. استخدم إعادة الضبط لتوسيع النطاق.'],
+ sy_t:['Changes and learning log','التغييرات وسجل التعلّم'],sy_d:['Track every SOP change from source to KB, LMS, Copilot and every brand, and share what trainers learn in class.','تتبّع كل تغيير في الإجراءات من المصدر حتى القاعدة والـLMS والـCopilot وكل براند، وشارك ما يتعلمه المدرّبون.'],
+ sy_h:['SOP changes: click a stage to move it forward. Learning log: record a question, approve the answer, then send it to every trainer.','التغييرات: اضغط مرحلة لتتقدّم. سجل التعلّم: سجّل سؤالاً واعتمد الإجابة ثم أرسلها لكل المدرّبين.'],
+ brands_upd:['Brands updated','البراندات المحدّثة'],upd:['Updated','تم التحديث'],pend:['Pending','قيد الانتظار'],
+ foot:['Prototype with fictional data. Built to show the approach, not to report real results.','نموذج أولي ببيانات خيالية. الهدف عرض الفكرة وليس عرض نتائج حقيقية.']
+});
+
+const S={brand:'all',lob:'all',tab:'overview',mode:'now',mod:'CS-101',qk:null,tk:null,stab:'sync'};
+const MU={};
+DEPTS.forEach(k=>{const d=DATA[k];MU[k]={
+ checks:Object.fromEntries(d.mods.map(m=>[m.id,m.checks.slice()])),
+ status:Object.fromEntries(d.mods.map(m=>[m.id,m.status])),
+ trainees:d.trainees.map(x=>({...x,checks:Array.from({length:6},(_,i)=>i<x.done),signed:false})),
+ sync:d.sync.map(x=>({...x,st:x.st.slice()})),log:d.log.map(x=>({...x})),fixes:{},released:{}}});
+
+const LN=k=>t(DATA[k].name);
+const lobs=()=>S.lob==='all'?DEPTS:[S.lob];
+const bOK=i=>S.brand==='all'||S.brand===i;
+const BI=[0,1,2,3,4,5];
+const avg=a=>a.reduce((x,y)=>x+y,0)/a.length;
+const sp=a=>Math.max(...a)-Math.min(...a);
+const r1=Math.round;
+const bCur=i=>avg(lobs().map(l=>DATA[l].cur[i]));
+const bBase=i=>avg(lobs().map(l=>DATA[l].base[i]));
+const bPct=(q,i)=>Math.max(20,Math.min(98,r1(q.c+(DATA[q.lob].cur[i]-avg(DATA[q.lob].cur))*1.2+((i*7+q.c)%5-2))));
+const gateOk=x=>x.checks.every(Boolean)&&x.as>=80&&x.qa>=85;
+const allMods=()=>lobs().flatMap(l=>DATA[l].mods.map(m=>({...m,lob:l})));
+const adopt=(m,i)=>MU[m.lob].status[m.id]!=='live'?'na':(DATA[m.lob].entVer[i]?'ok':'behind');
+const adoptTxt={ok:'s_ok',behind:'s_beh',na:'s_na'};
+const adoptPill={ok:'p-good',behind:'p-warn',na:'p-mute'};
+const dots=m=>`<span class="bds">${BI.map(i=>`<i class="bd ${adopt(m,i)} ${S.brand===i?'me':''}" title="${t(ENT[i])}: ${u(adoptTxt[adopt(m,i)])}"></i>`).join('')}</span>`;
+const scopeTxt=()=>`${S.brand==='all'?u('sc_all_b'):t(ENT[S.brand])} · ${S.lob==='all'?u('sc_all_l'):LN(S.lob)}`;
+const heat=v=>v>=86?'h-good':v>=83?'h-mid':'h-low';
+
+function head(tt,dd,hh){return `<div class="head"><h1>${u(tt)}</h1><p>${u(dd)}</p></div><div class="guide"><b>${u('how')}:</b> ${u(hh)}</div>`}
+const empty=()=>`<section class="panel"><p class="empty">${u('empty')}</p></section>`;
+
+/* ---------- overview ---------- */
+function vOv(){
+ const L_=lobs(),bi=S.brand==='all'?BI:[S.brand];
+ const cur=BI.map(bCur),base=BI.map(bBase),mean=avg(cur),vals=S.mode==='now'?cur:base,vm=avg(vals);
+ const gapN=sp(cur),gapB=sp(base);
+ const sc=avg(bi.map(i=>cur[i])),scB=avg(bi.map(i=>base[i]));
+ const pass=avg(L_.map(l=>DATA[l].pass[1]))+(S.brand==='all'?0:cur[S.brand]-mean),passB=avg(L_.map(l=>DATA[l].pass[0]));
+ const pairs=bi.flatMap(i=>L_.map(l=>DATA[l].entVer[i])),lat=pairs.filter(Boolean).length;
+ const kbv=avg(bi.flatMap(i=>L_.map(l=>DATA[l].entKb[i]))),sla=avg(L_.map(l=>DATA[l].sla));
+ const tile=(l,v,dl,g)=>`<div class="tile"><div class="l">${u(l)}</div><div class="v">${v}</div><div class="d ${g?'good':''}">${dl}</div></div>`;
+ const hmHead=`<tr><th>${u('sc_brand')}</th>${DEPTS.map(l=>`<th class="c"><button type="button" class="lnk" data-act="lob" data-v="${l}">${LN(l)}</button></th>`).join('')}<th class="c"><button type="button" class="lnk" data-act="lob" data-v="all">${u('all_lines')}</button></th></tr>`;
+ const hmRows=BI.map(i=>{
+  const cells=DEPTS.map(l=>{const v=DATA[l].cur[i],sel=(S.brand===i&&S.lob===l);
+   return `<td><button type="button" class="cell ${heat(v)} ${sel?'on':''}" data-act="cell" data-b="${i}" data-l="${l}">${v}${DATA[l].entVer[i]?'':'<span class="vd"></span>'}</button></td>`}).join('');
+  const av=r1(avg(DEPTS.map(l=>DATA[l].cur[i]))),sel=(S.brand===i&&S.lob==='all');
+  return `<tr><td class="rh"><button type="button" class="lnk" data-act="brand" data-v="${i}">${t(ENT[i])}</button></td>${cells}<td><button type="button" class="cell ${heat(av)} ${sel?'on':''}" data-act="cell" data-b="${i}" data-l="all">${av}</button></td></tr>`}).join('');
+ const bars=BI.map(i=>`<div class="brow ${S.brand!=='all'&&S.brand!==i?'dim':''}" data-act="brand" data-v="${i}"><span>${t(ENT[i])}</span><div class="track"><div class="fill ${vals[i]>=85?'hi':vals[i]<75?'lo':''}" style="width:${(vals[i]-50)*2}%"></div><span class="avg" style="inset-inline-start:${(vm-50)*2}%"></span></div><span class="val">${r1(vals[i])}</span></div>`).join('');
+ const trows=BI.map(i=>{const pr=L_.map(l=>DATA[l].entVer[i]),n=pr.filter(Boolean).length,k=r1(avg(L_.map(l=>DATA[l].entKb[i])));
+  return `<tr data-act="brand" data-v="${i}" class="${S.brand===i?'sel':''}"><td>${t(ENT[i])}</td><td class="n">${r1(cur[i])}</td><td class="n">${n}/${pr.length}</td><td class="n">${k}%</td><td><span class="pill ${n===pr.length?'p-good':'p-warn'}">${u(n===pr.length?'latest':'behind')}</span></td></tr>`}).join('');
+ const att=[];
+ L_.forEach(l=>DATA[l].qs.forEach((q,i)=>{const pct=S.brand==='all'?q.c:bPct({...q,lob:l},S.brand);if(pct<60)att.push({c:'bad',x:u('a_q',{n:pct,q:t(q.q)}),tab:'assessments',k:l+':'+i,p:pct})}));
+ att.sort((a,b)=>a.p-b.p);att.splice(2);
+ L_.forEach(l=>MU[l].sync.filter(s=>s.due<0&&s.st.some(x=>x<2)).forEach(s=>att.push({c:'bad',x:u('a_s',{id:s.id,t:t(s.t)}),tab:'sync'})));
+ L_.forEach(l=>MU[l].trainees.filter(x=>bOK(x.e)&&gateOk(x)&&!x.signed).forEach(x=>att.push({c:'warn',x:u('a_n',{n:t(TN[x.n])}),tab:'nesting'})));
+ L_.forEach(l=>DATA[l].mods.filter(x=>MU[l].status[x.id]==='review').forEach(x=>att.push({c:'warn',x:u('a_m',{id:x.id}),tab:'curriculum'})));
+ bi.forEach(i=>L_.forEach(l=>{if(!DATA[l].entVer[i])att.push({c:'warn',x:u('a_b',{b:t(ENT[i]),l:LN(l)}),tab:'curriculum'})}));
+ return head('ov_t','ov_d','ov_h')+`
+ <details class="panel start" open><summary>${u('start')}</summary><div class="steps">${[1,2,3,4].map(n=>`<div class="step"><b class="n">${n}</b><h3>${u('s'+n+'t')}</h3><p>${u('s'+n)}</p></div>`).join('')}</div></details>
+ <section class="panel"><h2>${u('matrix')}</h2><p class="sub">${u('matrix_s')}</p><div class="tw"><table class="hm">${hmHead}${hmRows}</table></div></section>
+ <div class="grid tiles">
+  ${tile('k_gap',`${gapN.toFixed(0)} ${u('pts')}`,`▼ ${(gapB-gapN).toFixed(0)} ${u('pts')} ${u('vsb')}`,1)}
+  ${tile('k_score',`${sc.toFixed(0)}`,`▲ ${(sc-scB).toFixed(0)} ${u('pts')} ${u('vsb')}`,1)}
+  ${tile('k_pass',`${r1(pass)}%`,`▲ ${r1(pass-passB)} ${u('pts')} ${u('vsb')}`,1)}
+  ${tile('k_latest',`${lat}/${pairs.length}`,'')}${tile('k_kb',`${r1(kbv)}%`,'')}${tile('k_sla',`${r1(sla)}%`,'')}
+ </div>
+ <div class="grid g2">
+  <section class="panel"><div class="row-between"><div><h2>${u('bc_t')}</h2><p class="sub" style="margin:0">${u('bc_s')}</p></div>
+   <div class="seg"><button type="button" data-act="mode" data-v="base" aria-pressed="${S.mode==='base'}">${u('base')}</button><button type="button" data-act="mode" data-v="now" aria-pressed="${S.mode==='now'}">${u('now')}</button></div></div>
+   <div class="spreadbox"><b>${sp(vals).toFixed(0)} ${u('pts')}</b><span class="sub" style="margin:0">${u('gap')}</span></div>
+   ${bars}<div class="axis"><span>50</span><span>75</span><span>100</span></div></section>
+  <section class="panel"><h2>${u('bt_t')}</h2><p class="sub">${u('bt_s')}</p><div class="tw"><table><tr><th>${u('sc_brand')}</th><th class="n">${u('score')}</th><th class="n">${u('bt_v')}</th><th class="n">${u('kb')}</th><th>${u('status')}</th></tr>${trows}</table></div></section>
+ </div>
+ <section class="panel"><h2>${u('attn')}</h2><p class="sub"></p>${att.length?`<ul class="attn">${att.slice(0,6).map(a=>`<li><span class="dot" style="background:var(--${a.c})"></span><span>${a.x}</span><button class="btn" type="button" data-act="goto" data-v="${a.tab}" ${a.k?`data-k="${a.k}"`:''}>${u('open')}</button></li>`).join('')}</ul>`:`<p class="empty">${u('none')}</p>`}</section>`;
+}
+
+/* ---------- curriculum ---------- */
+function vCur(){
+ const mods=allMods();if(!mods.length)return head('cu_t','cu_d','cu_h')+empty();
+ const sel=mods.find(x=>x.id===S.mod)||mods[0];S.mod=sel.id;
+ const m=MU[sel.lob],ck=m.checks[sel.id],st=m.status[sel.id];
+ const rows=lobs().map(l=>`<tr class="grp"><td colspan="4">${LN(l)}</td></tr>`+DATA[l].mods.map(x=>{const mm={...x,lob:l},s=MU[l].status[x.id];
+  return `<tr data-act="selmod" data-v="${x.id}" class="${x.id===sel.id?'sel':''}"><td><span class="mono">${x.id}</span><br>${t(x.name)}</td><td class="mono">${x.ver}</td><td><span class="pill ${s==='live'?'p-good':'p-warn'}">${u(s)}</span></td><td>${dots(mm)}</td></tr>`}).join('')).join('');
+ const B=[['open',10,u('b_open')],['present',25,t(sel.concept)],['practice',30,t(sel.activity)],['check',15,u('b_check')],['open',10,u('b_wrap')]];
+ const col={open:'--c-open',present:'--c-present',practice:'--c-practice',check:'--c-check'};
+ const tl=B.map(b=>`<div class="blk"><span class="m">${b[1]} ${u('min')}</span><div><span class="chip" style="background:var(${col[b[0]]})">${u('t_'+b[0])}</span>${b[2]}</div></div>`).join('');
+ const checks=[1,2,3,4,5,6].map((n,i)=>`<label class="chk"><input type="checkbox" ${ck[i]?'checked':''} ${st==='live'?'disabled':''} data-act="chk" data-v="${i}"><span>${u('q'+n)}</span></label>`).join('');
+ const all=ck.every(Boolean),rel=m.released[sel.id];
+ const [mj,mn]=sel.ver.slice(1).split('.').map(Number);
+ const cl=[[sel.ver,sel.date,'cl1'],[`v${mj}.${Math.max(mn-1,0)}`,'—','cl2'],[`v${Math.max(mj-1,1)}.0`,'—','cl3']];
+ const clh=cl.map((c,i)=>`<tr><td class="mono">${i===0&&st==='review'?c[0]+' (draft)':c[0]}</td><td>${u(c[2])}</td><td class="mono">${c[1]}</td><td>${i===2?`<span class="pill p-mute">retired</span>`:''}</td></tr>`).join('');
+ const ro=BI.map(i=>{const a=adopt(sel,i);return `<tr class="${S.brand===i?'sel':''}"><td>${t(ENT[i])}</td><td><span class="pill ${adoptPill[a]}">${u(adoptTxt[a])}</span></td></tr>`}).join('');
+ return head('cu_t','cu_d','cu_h')+`<div class="grid split">
+ <section class="panel"><div class="tw"><table><tr><th>${u('module')}</th><th>${u('ver')}</th><th>${u('status')}</th><th>${u('brands_latest')}</th></tr>${rows}</table></div></section>
+ <section class="panel"><div class="row-between"><h2>${t(sel.name)}</h2><span class="pill ${st==='live'?'p-good':'p-warn'}">${u(st)}</span></div>
+  <div class="meta"><span class="tagl">${LN(sel.lob)}</span><span class="mono">${sel.id} ${sel.ver}</span><span>${u('owner')}: ${sel.owner}</span><span>${u('eff')}: ${sel.date}</span><span>90 ${u('min')}</span></div>
+  <h3 class="s">${u('rollout')}</h3><div class="tw"><table>${ro}</table></div>
+  <h3 class="s">${u('obj')}</h3><ul class="plain">${sel.objs.map(o=>`<li>${t(o)}</li>`).join('')}</ul>
+  <h3 class="s">${u('flow')}</h3><div class="stack">${B.map(b=>`<i title="${b[1]}" style="flex:${b[1]};background:var(${col[b[0]]})"></i>`).join('')}</div>${tl}
+  <h3 class="s">${u('fg')}</h3><div class="note">${t(sel.concept)}</div>
+  <h3 class="s">${u('qa')}</h3><p class="sub" style="margin:0 0 4px">${u('qa_s')}</p>${checks}
+  ${st==='review'?`<div style="margin-top:8px"><button class="btn pri" type="button" data-act="approve" ${all?'':'disabled'}>${u('approve')}</button></div>`:(rel?`<p class="good" style="font-weight:600">${u('released')}</p>`:'')}
+  <h3 class="s">${u('cl')}</h3><div class="tw"><table>${clh}</table></div>
+ </section></div>`;
+}
+
+/* ---------- assessments ---------- */
+function scopedQs(){
+ return lobs().flatMap(l=>DATA[l].qs.map((q,i)=>({...q,lob:l,key:l+':'+i}))).map(q=>({...q,pct:S.brand==='all'?q.c:bPct(q,S.brand)})).sort((a,b)=>a.pct-b.pct);
+}
+function vAsm(){
+ const qs=scopedQs(),q=qs.find(x=>x.key===S.qk)||qs[0];S.qk=q.key;
+ const a=r1(avg(qs.map(x=>x.pct))),fl=qs.filter(x=>x.pct<60).length,pass=r1(avg(lobs().map(l=>DATA[l].pass[1])));
+ const rows=qs.map(x=>`<tr data-act="selq" data-v="${x.key}" class="${x.key===q.key?'sel':''}"><td><span class="tagl">${LN(x.lob)}</span><span class="mono">${x.m}</span><br>${t(x.q)}</td><td style="min-width:130px"><div class="brow" style="grid-template-columns:minmax(0,1fr) 38px;margin:0"><div class="track"><div class="fill ${x.pct<60?'lo':x.pct>=80?'hi':''}" style="width:${x.pct}%"></div><span class="thr"></span></div><span class="val">${x.pct}%</span></div></td><td><span class="pill ${x.pct<60?'p-bad':'p-good'}">${u(x.pct<60?'flag':'ok')}</span></td></tr>`).join('');
+ const L4='ABCD',opts=q.d.map((v,i)=>`<div class="opt ${i===q.r?'right':''}"><b>${L4[i]}</b><div class="track"><div class="fill" style="width:${v}%"></div></div><span class="val">${v}%</span></div>`).join('');
+ const byb=BI.map(i=>{const v=bPct(q,i);return `<div class="brow ${S.brand!=='all'&&S.brand!==i?'dim':''}" style="grid-template-columns:100px minmax(0,1fr) 40px"><span>${t(ENT[i])}</span><div class="track"><div class="fill ${v<60?'lo':v>=80?'hi':''}" style="width:${v}%"></div><span class="thr"></span></div><span class="val">${v}%</span></div>`}).join('');
+ const fx=MU[q.lob].fixes[q.key];
+ return head('as_t','as_d','as_h')+`
+ <div class="grid tiles"><div class="tile"><div class="l">${u('as_avg')}</div><div class="v">${a}%</div><div class="d"></div></div><div class="tile"><div class="l">${u('as_pass')}</div><div class="v">${pass}%</div><div class="d"></div></div><div class="tile"><div class="l">${u('as_flag')}</div><div class="v ${fl?'bad':''}">${fl}</div><div class="d"></div></div></div>
+ <div class="grid split"><section class="panel"><div class="tw"><table><tr><th>${u('question')}</th><th>${u('correct')}</th><th>${u('status')}</th></tr>${rows}</table></div><p class="sub" style="margin:10px 0 0">${u('thr')}</p></section>
+ <section class="panel"><h2>${t(q.q)}</h2><div class="meta"><span class="tagl">${LN(q.lob)}</span><span class="mono">${q.m}</span><span>${u('correct')}: ${q.pct}%</span></div>
+  <h3 class="s">${u('bybrand')}</h3>${byb}
+  <h3 class="s">${u('dist')}</h3><div class="opts">${opts}</div>
+  <div class="note">${q.ins?t(q.ins):u('ok_ins')}</div>
+  ${q.ins?`<div style="margin-top:12px">${fx?`<span class="pill p-good">${u('fixed')}</span>`:`<button class="btn pri" type="button" data-act="fix" data-v="${q.key}">${u('mkfix')}</button>`}</div>`:''}
+ </section></div>`;
+}
+
+/* ---------- nesting ---------- */
+function vNest(){
+ const items=lobs().flatMap(l=>MU[l].trainees.map((x,i)=>({x,l,key:l+':'+i}))).filter(o=>bOK(o.x.e));
+ if(!items.length)return head('n_t','n_d','n_h')+empty();
+ const cur=items.find(o=>o.key===S.tk)||items[0];S.tk=cur.key;const x=cur.x,d=DATA[cur.l];
+ const pct=y=>Math.round(y.checks.filter(Boolean).length/6*100);
+ const rows=items.map(o=>{const y=o.x,ok=gateOk(y),stt=y.signed?['p-good','signed']:ok?['p-warn','ready']:y.checks.every(Boolean)?['p-bad','blocked']:['p-mute','inprog'];
+  return `<tr data-act="seltr" data-v="${o.key}" class="${o.key===cur.key?'sel':''}"><td>${t(TN[y.n])}<br><span class="mono">${t(ENT[y.e])}</span></td><td><span class="tagl">${LN(o.l)}</span></td><td style="min-width:90px"><div class="pbar"><i style="width:${pct(y)}%"></i></div></td><td><span class="pill ${stt[0]}">${u(stt[1])}</span></td></tr>`}).join('');
+ const list=d.nestItems.map((it,k)=>`${k%2===0?`<h3 class="s">${u('week')} ${k/2+1}</h3>`:''}<label class="chk"><input type="checkbox" data-act="ncheck" data-v="${k}" ${x.checks[k]?'checked':''} ${x.signed?'disabled':''}><span>${t(it)}</span></label>`).join('');
+ const g=(ok,tx,val)=>`<div><span class="${ok?'good':'bad'}">${ok?'✓':'✗'}</span><span>${tx}${val?` (${val})`:''}</span></div>`;
+ return head('n_t','n_d','n_h')+`<div class="grid split">
+ <section class="panel"><div class="tw"><table><tr><th>${u('trainee')}</th><th>${u('lob')}</th><th>${u('progress')}</th><th>${u('status')}</th></tr>${rows}</table></div></section>
+ <section class="panel"><div class="row-between"><h2>${t(TN[x.n])} · ${t(ENT[x.e])}</h2><span class="pill p-mute">${pct(x)}%</span></div><div class="meta"><span class="tagl">${LN(cur.l)}</span></div>
+  ${list}<h3 class="s">${u('gate')}</h3><div class="gate">${g(x.checks.every(Boolean),u('g1'))}${g(x.as>=80,u('g2'),x.as)}${g(x.qa>=85,u('g3'),x.qa||'—')}</div>
+  ${x.signed?`<span class="pill p-good">${u('signed')}</span>`:`<button class="btn pri" type="button" data-act="sign" ${gateOk(x)?'':'disabled'}>${u('signoff')}</button>`}
+ </section></div>`;
+}
+
+/* ---------- changes and learning ---------- */
+function vSync(){
+ const names=['KB','LMS','Copilot'];
+ const syn=lobs().flatMap(l=>MU[l].sync.map((s,i)=>({s,l,i})));
+ const dueTx=s=>s.st.every(v=>v===2)?u('closed'):s.due<0?u('late',{n:-s.due}):u('in_d',{n:s.due});
+ const roll=s=>{const n=s.st.reduce((a,b)=>a+b,0);return `<span class="bds">${BI.map(i=>`<i class="bd ${i<n?'ok':'na'} ${S.brand===i?'me':''}" title="${t(ENT[i])}: ${u(i<n?'upd':'pend')}"></i>`).join('')}</span>${S.brand!=='all'?` <span class="pill ${S.brand<n?'p-good':'p-warn'}">${u(S.brand<n?'upd':'pend')}</span>`:''}`};
+ const srows=syn.map(({s,l,i})=>{const done=s.st.every(v=>v===2),over=s.due<0&&!done;
+  return `<tr><td><span class="tagl">${LN(l)}</span><span class="mono">${s.id}</span><br>${t(s.t)}</td><td>${t(s.s)}</td><td><div class="pipe">${s.st.map((v,k)=>`<button type="button" class="stg s${v}" data-act="adv" data-l="${l}" data-i="${i}" data-k="${k}" ${v===2?'disabled':''}>${v===2?'✓ ':''}${names[k]}</button>`).join('')}</div></td><td>${roll(s)}</td><td><span class="pill ${done?'p-good':over?'p-bad':'p-warn'}">${dueTx(s)}</span></td></tr>`}).join('');
+ const logs=lobs().flatMap(l=>MU[l].log.map((c,i)=>({c,l,i}))).filter(o=>bOK(o.c.e));
+ const cards=logs.map(({c,l,i})=>{const sts=[['p-warn','st_new'],['p-mute','st_app'],['p-good','st_bc']][c.s];
+  return `<div class="lcard"><div class="row-between" style="margin:0"><span class="q">${t(c.q)}</span><span class="pill ${sts[0]}">${u(sts[1])}</span></div>
+  <span class="sub" style="margin:0"><span class="tagl">${LN(l)}</span>${u('raised',{n:t(TR[c.tr]),e:t(ENT[c.e])})}</span>
+  <div class="ans">${c.a?t(c.a):u('pend_ans')}</div>
+  <div class="row-between" style="margin:0"><div class="ring"><div class="pbar" style="width:120px"><i style="width:${c.ack[1]?c.ack[0]/c.ack[1]*100:0}%"></i></div><span class="sub" style="margin:0">${c.ack[0]}/${c.ack[1]} ${u('ack')}</span></div>
+  ${c.s===0?`<button class="btn" type="button" data-act="lapp" data-l="${l}" data-i="${i}">${u('approve_a')}</button>`:c.s===1?`<button class="btn pri" type="button" data-act="lbc" data-l="${l}" data-i="${i}">${u('broadcast')}</button>`:''}</div></div>`}).join('');
+ const body=S.stab==='sync'
+  ?(syn.length?`<section class="panel"><div class="tw"><table class="stk"><tr><th>${u('chg')}</th><th>${u('src')}</th><th>${u('pipe')}</th><th>${u('brands_upd')}</th><th>${u('due')}</th></tr>${srows}</table></div></section>`:empty())
+  :`<section class="panel"><form class="form" id="lform"><input id="lq" type="text" placeholder="${u('new_q')}" aria-label="${u('new_q')}"><button class="btn pri" type="submit">${u('add')}</button></form>${logs.length?`<div class="cards">${cards}</div>`:`<p class="empty">${u('empty')}</p>`}</section>`;
+ return head('sy_t','sy_d','sy_h')+`<div class="seg" style="justify-self:start"><button type="button" data-act="stab" data-v="sync" aria-pressed="${S.stab==='sync'}">${u('t_sync')}</button><button type="button" data-act="stab" data-v="log" aria-pressed="${S.stab==='log'}">${u('t_log')}</button></div>${body}`;
+}
+
+/* ---------- shell ---------- */
+const TABS=[['overview','ov','ov_s',vOv],['curriculum','cur','cur_s',vCur],['assessments','asm','asm_s',vAsm],['nesting','nest','nest_s',vNest],['sync','sync','sync_s',vSync]];
+function scopeHtml(){
+ const bo=`<option value="all">${u('sc_all_b')}</option>`+BI.map(i=>`<option value="${i}" ${S.brand===i?'selected':''}>${t(ENT[i])}</option>`).join('');
+ const lo=`<option value="all">${u('sc_all_l')}</option>`+DEPTS.map(l=>`<option value="${l}" ${S.lob===l?'selected':''}>${LN(l)}</option>`).join('');
+ const on=S.brand!=='all'||S.lob!=='all';
+ return `<label>${u('sc_brand')}<select id="sb">${bo}</select></label><label>${u('sc_lob')}<select id="sl">${lo}</select></label>${on?`<button class="btn" type="button" data-act="reset">${u('sc_reset')}</button>`:''}<span class="showing">${u('sc_show')}: <b>${scopeTxt()}</b></span>`;
+}
+function render(){
+ document.documentElement.lang=lang;document.documentElement.dir=lang==='ar'?'rtl':'ltr';
+ document.getElementById('appname').textContent=u('app');document.getElementById('demo').textContent=u('demo');document.getElementById('tagline').textContent=u('tag');
+ document.title=u('app');
+ document.querySelectorAll('#langseg button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.lang===lang)));
+ document.getElementById('tabs').innerHTML=TABS.map(x=>`<button type="button" data-act="goto" data-v="${x[0]}" ${S.tab===x[0]?'aria-current="page"':''}>${u(x[1])}<small>${u(x[2])}</small></button>`).join('');
+ document.getElementById('scope').innerHTML=scopeHtml();
+ const v=TABS.find(x=>x[0]===S.tab)||TABS[0];
+ document.getElementById('app').innerHTML=v[3]()+`<p class="foot">${u('foot')}</p>`;
+}
+function go(tab){S.tab=tab;try{history.replaceState(null,'','#'+tab)}catch(e){location.hash=tab}render();window.scrollTo(0,0)}
+document.addEventListener('click',e=>{
+ const lb=e.target.closest('[data-lang]');
+ if(lb){lang=lb.dataset.lang;try{localStorage.setItem('th-lang',lang)}catch(x){}render();return}
+ const b=e.target.closest('[data-act]');if(!b||b.disabled)return;
+ const a=b.dataset.act,v=b.dataset.v;
+ const mlob=()=>{const m=allMods().find(x=>x.id===S.mod);return m?m.lob:'cs'};
+ if(a==='goto'){if(b.dataset.k){if(v==='assessments')S.qk=b.dataset.k}return go(v)}
+ else if(a==='brand'){S.brand=+v}
+ else if(a==='lob'){S.lob=v}
+ else if(a==='cell'){S.brand=+b.dataset.b;S.lob=b.dataset.l}
+ else if(a==='reset'){S.brand='all';S.lob='all'}
+ else if(a==='mode')S.mode=v;
+ else if(a==='selmod')S.mod=v;
+ else if(a==='chk'){const l=mlob(),c=MU[l].checks[S.mod];c[+v]=!c[+v]}
+ else if(a==='approve'){const l=mlob();MU[l].status[S.mod]='live';MU[l].released[S.mod]=true}
+ else if(a==='selq')S.qk=v;
+ else if(a==='fix'){MU[v.split(':')[0]].fixes[v]=true}
+ else if(a==='seltr')S.tk=v;
+ else if(a==='ncheck'){const [l,i]=S.tk.split(':'),x=MU[l].trainees[+i];x.checks[+v]=!x.checks[+v]}
+ else if(a==='sign'){const [l,i]=S.tk.split(':');MU[l].trainees[+i].signed=true}
+ else if(a==='stab')S.stab=v;
+ else if(a==='adv'){const s=MU[b.dataset.l].sync[+b.dataset.i],k=+b.dataset.k;if(s.st[k]<2)s.st[k]++}
+ else if(a==='lapp'){const c=MU[b.dataset.l].log[+b.dataset.i];c.s=1;if(!c.a)c.a=L('Approved by the curriculum owner. Full guidance is published in the KB.','معتمدة من مسؤول المنهج. الإرشاد الكامل منشور في قاعدة المعرفة.')}
+ else if(a==='lbc'){const c=MU[b.dataset.l].log[+b.dataset.i];c.s=2;c.ack=[Math.min(2,c.ack[1]),c.ack[1]]}
+ render();
+});
+document.addEventListener('change',e=>{
+ if(e.target.id==='sb'){S.brand=e.target.value==='all'?'all':+e.target.value;render()}
+ else if(e.target.id==='sl'){S.lob=e.target.value;render()}
+});
+document.addEventListener('submit',e=>{
+ if(e.target.id!=='lform')return;e.preventDefault();
+ const inp=document.getElementById('lq'),val=inp.value.trim();if(!val)return;
+ const l=S.lob==='all'?'cs':S.lob;
+ MU[l].log.unshift({q:L(val,val),e:S.brand==='all'?0:S.brand,tr:0,a:null,s:0,ack:[0,6]});render();
+});
+window.addEventListener('hashchange',()=>{const h=location.hash.slice(1);if(TABS.some(x=>x[0]===h)&&h!==S.tab){S.tab=h;render()}});
+{const h=location.hash.slice(1);if(TABS.some(x=>x[0]===h))S.tab=h}
+render();
+</script>
