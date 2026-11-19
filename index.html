@@ -295,6 +295,18 @@ tr.grp td{background:var(--surface2);font-weight:600;color:var(--head);font-size
 .brandrow span.bm{width:55px;background:none}.brandrow span.bm img{max-width:none;max-height:none;width:100%;height:100%;object-fit:cover;border-radius:11px}
 @media(max-width:480px){.brandrow span{width:64px;height:34px}.brandrow span.bm{width:44px}}
 .tright{display:flex;align-items:center;gap:10px}.acad{font-weight:600;font-size:14px;color:var(--head);text-decoration:none;padding:8px 14px;border-radius:9999px;border:1px solid var(--line);background:var(--surface)}.acad:hover{background:var(--surface2)}
+.sla{height:6px;border-radius:99px;background:var(--surface2);margin-top:6px;min-width:90px;overflow:hidden}
+.sla i{display:block;height:100%;background:var(--accent)}
+.sla i.lo{background:var(--bad)}
+.lockrow{display:flex;gap:10px;align-items:center;padding:4px 0}
+.lcrow{display:flex;gap:10px;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px dashed var(--line);flex-wrap:wrap}
+.lcrow>div{flex:1 1 200px;min-width:0}
+.form select{padding:10px 14px;border-radius:32px;border:1px solid var(--line);background:var(--surface);color:var(--fg);font:inherit}
+.lrow{display:grid;grid-template-columns:24px minmax(0,1fr) 34px auto;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)}
+.rk{width:24px;height:24px;border-radius:50%;background:var(--surface2);display:grid;place-items:center;font-size:12px;font-weight:600;color:var(--muted)}
+.planl{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.planl li{display:flex;gap:10px;align-items:center;justify-content:space-between;padding:10px 14px;border:1px solid var(--line);border-radius:14px;flex-wrap:wrap}
+.pk{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--accent-ink);margin-inline-end:6px}
 </style>
 
 <header class="top"><div class="wrap topbar">
@@ -476,16 +488,42 @@ Object.assign(U,{
  sy_t:['Changes and learning log','التغييرات وسجل التعلّم'],sy_d:['Track every SOP change from source to KB, LMS, Copilot and every brand, and share what trainers learn in class.','تتبّع كل تغيير في الإجراءات من المصدر حتى القاعدة والـLMS والـCopilot وكل براند، وشارك ما يتعلمه المدرّبون.'],
  sy_h:['SOP changes: click a stage to move it forward. Learning log: record a question, approve the answer, then send it to every trainer.','التغييرات: اضغط مرحلة لتتقدّم. سجل التعلّم: سجّل سؤالاً واعتمد الإجابة ثم أرسلها لكل المدرّبين.'],
  brands_upd:['Brands updated','البراندات المحدّثة'],upd:['Updated','تم التحديث'],pend:['Pending','قيد الانتظار'],
+ sla_rule:['Critical changes have a 48 hour SLA. Standard changes have 5 days. KB, Copilot and LMS update in parallel once the change is approved. The old version retires on its effective date, not before.','التغييرات الحرجة مهلتها 48 ساعة، والعادية 5 أيام. القاعدة وCopilot والـLMS تتحدّث بالتوازي بعد اعتماد التغيير. تُسحب النسخة القديمة في تاريخ سريانها لا قبله.'],
+ sev_c:['Critical','حرج'],sev_n:['Standard','عادي'],
+ sla_left:['{n}h left of {t}h','متبقي {n} ساعة من {t}'],sla_over:['{n}h over SLA','متأخر {n} ساعة عن المهلة'],
+ cc_l:['Copilot conflict check','فحص تعارض Copilot'],cc_ok:['0 conflicts','لا تعارض'],cc_n:['{n} conflict','{n} تعارض'],cc_fix:['Mark resolved','تم الحل'],retire:['Old version retires {d}','تُسحب النسخة القديمة في {d}'],
+ core_t:['Global core','الجوهر العالمي'],core_s:['Locked. Entity trainers cannot change these.','مقفول. لا يستطيع مدرّبو الفروع تعديلها.'],locked:['Locked','مقفول'],
+ core1:['SOP steps and policies','خطوات الإجراء والسياسات'],core2:['Tool and Copilot behavior','سلوك الأدوات وCopilot'],core3:['Quality standard','معيار الجودة'],core4:['Assessment and pass mark','الاختبار ودرجة النجاح'],
+ loc_t:['Local layer','الطبقة المحلية'],loc_s:['Examples, tone and market cases added by entity trainers. They go live only after global review.','أمثلة ونبرة وحالات سوق يضيفها مدرّبو الفروع. لا تُفعَّل إلا بعد المراجعة العالمية.'],
+ loc_none:['No local examples for this module yet.','لا توجد أمثلة محلية لهذا الموديول بعد.'],loc_live:['Live in brand','مفعّل في البراند'],loc_rev:['Needs review','بانتظار المراجعة'],loc_ok:['Approve','اعتماد'],
+ loc_ph:['Add a local example for this module','أضف مثالاً محلياً لهذا الموديول'],loc_add:['Add example','إضافة مثال'],
+ loop_t:['Learning loop','حلقة التعلّم'],loop_s:['Where agents fail in their first two weeks, and what they search for without finding it. Add items to the plan for next month.','أين يفشل الموظفون في أول أسبوعين، وما الذي يبحثون عنه ولا يجدونه. أضف البنود لخطة الشهر القادم.'],
+ loop_f:['Top 5 reasons agents fail in weeks 1 and 2 (agents)','أكثر 5 أسباب فشل في الأسبوعين الأولين (عدد الموظفين)'],loop_z:['Top 5 searches with zero results (searches)','أكثر 5 عمليات بحث بدون نتائج (عدد المرات)'],
+ add_plan:['Add to plan','إضافة للخطة'],in_plan:['In plan','في الخطة'],plan_t:['Plan for next month','خطة الشهر القادم'],
+ plan_empty:['Nothing added yet. Add reasons and searches above, or create content fixes from the questions.','لم يُضف شيء بعد. أضف الأسباب وعمليات البحث من الأعلى، أو أنشئ مهام تعديل من الأسئلة.'],
+ plan_cap:['Vitality capsule','كبسولة تنشيط'],plan_kb:['Write KB article','كتابة مقالة قاعدة'],plan_lp:['Fix lesson plan','تعديل خطة درس'],rm:['Remove','إزالة'],
  foot:['Prototype with fictional data. Built to show the approach, not to report real results. A concept prototype, not an official product of Delivery Hero or any brand. Logos belong to their owners.','نموذج أولي ببيانات خيالية. الهدف عرض الفكرة وليس عرض نتائج حقيقية. هذا نموذج لفكرة وليس منتجًا رسميًا لـ Delivery Hero أو أي علامة تجارية. الشعارات ملك أصحابها.']
 });
 
+const SYNX={'SYN-2041':{sev:'crit',h:31,eff:'01 Dec 2026',cc:0},'SYN-2038':{sev:'norm',h:98,eff:'08 Dec 2026',cc:1},'SYN-2033':{sev:'crit',h:-20,eff:'28 Nov 2026',cc:0}};
+const LOC=[
+ {m:'CS-101',e:0,t:L('Local example: a late order during the evening peak','مثال محلي: تأخر طلب وقت ذروة المساء'),s:1},
+ {m:'CS-101',e:1,t:L('Dialect note: use short, polite phrases when apologising','ملاحظة لهجة: استخدم عبارات قصيرة ومهذبة عند الاعتذار'),s:0}];
+const PLAN=new Set();
+const LOOP={
+ cs:{f:[{t:L('Wrong compensation tier','اختيار مستوى التعويض الخطأ'),n:14},{t:L('Skipped the ID check','تخطي التحقق من الهوية'),n:11},{t:L('Used a Copilot answer without editing','استخدام رد Copilot بدون تعديل'),n:9},{t:L('Missed the escalation step','نسيان خطوة التصعيد'),n:7},{t:L('Wrong refund code','كود الاسترداد الخطأ'),n:5}],
+     z:[{t:L('tier 3 refund','استرداد المستوى 3'),n:38},{t:L('duplicate charge','خصم مكرر'),n:29},{t:L('partial delivery','توصيل جزئي'),n:24},{t:L('voucher expiry','انتهاء القسيمة'),n:18},{t:L('vendor fault','خطأ المطعم'),n:12}]},
+ rd:{f:[{t:L('Wrong reassignment threshold','حد إعادة الإسناد الخطأ'),n:12},{t:L('Late first response to an incident','تأخر الاستجابة الأولى لحادث'),n:10},{t:L('Opened the wrong payout report','فتح تقرير دفعات خطأ'),n:9},{t:L('Missed a document check','نسيان فحص مستند'),n:6},{t:L('Wrong account state','حالة حساب خطأ'),n:4}],
+     z:[{t:L('device swap','استبدال الجهاز'),n:33},{t:L('payout deduction','خصم الدفعة'),n:27},{t:L('accident report','بلاغ حادث'),n:21},{t:L('rider unblock','فك إيقاف مندوب'),n:15},{t:L('bike breakdown','عطل الدراجة'),n:10}]},
+ vd:{f:[{t:L('Wrong menu approval step','خطوة اعتماد قائمة خطأ'),n:11},{t:L('Missed the missing-item rule','نسيان قاعدة الصنف الناقص'),n:9},{t:L('Wrong payout date','تاريخ دفعة خطأ'),n:8},{t:L('Invoice fields mixed up','خلط بيانات الفاتورة'),n:6},{t:L('Skipped tablet reset steps','تخطي خطوات إعادة ضبط التابلت'),n:4}],
+     z:[{t:L('vendor payout date','موعد دفع المطعم'),n:31},{t:L('missing item credit','تعويض صنف ناقص'),n:26},{t:L('tablet offline','التابلت لا يعمل'),n:20},{t:L('menu price change','تغيير سعر القائمة'),n:14},{t:L('store closed early','إغلاق المتجر مبكراً'),n:9}]}};
 const S={brand:'all',lob:'all',tab:'overview',mode:'now',mod:'CS-101',qk:null,tk:null,stab:'sync'};
 const MU={};
 DEPTS.forEach(k=>{const d=DATA[k];MU[k]={
  checks:Object.fromEntries(d.mods.map(m=>[m.id,m.checks.slice()])),
  status:Object.fromEntries(d.mods.map(m=>[m.id,m.status])),
  trainees:d.trainees.map(x=>({...x,checks:Array.from({length:6},(_,i)=>i<x.done),signed:false})),
- sync:d.sync.map(x=>({...x,st:x.st.slice()})),log:d.log.map(x=>({...x})),fixes:{},released:{}}});
+ sync:d.sync.map(x=>({sev:'norm',h:x.due*24,eff:'15 Dec 2026',cc:0,...(SYNX[x.id]||{}),...x,st:x.st.slice()})),log:d.log.map(x=>({...x})),fixes:{},released:{}}});
 
 const LN=k=>t(DATA[k].name);
 const lobs=()=>S.lob==='all'?DEPTS:[S.lob];
@@ -566,6 +604,10 @@ function vCur(){
  const tl=B.map(b=>`<div class="blk"><span class="m">${b[1]} ${u('min')}</span><div><span class="chip" style="background:var(${col[b[0]]})">${u('t_'+b[0])}</span>${b[2]}</div></div>`).join('');
  const checks=[1,2,3,4,5,6].map((n,i)=>`<label class="chk"><input type="checkbox" ${ck[i]?'checked':''} ${st==='live'?'disabled':''} data-act="chk" data-v="${i}"><span>${u('q'+n)}</span></label>`).join('');
  const all=ck.every(Boolean),rel=m.released[sel.id];
+ const locItems=LOC.filter(x=>x.m===sel.id&&(S.brand==='all'||x.e===S.brand));
+ const locHtml=`<h3 class="s">${u('core_t')}</h3><p class="sub" style="margin:0 0 4px">${u('core_s')}</p>${[1,2,3,4].map(n=>`<div class="lockrow"><span class="pill p-mute">${u('locked')}</span><span>${u('core'+n)}</span></div>`).join('')}
+  <h3 class="s">${u('loc_t')}</h3><p class="sub" style="margin:0 0 4px">${u('loc_s')}</p>${locItems.length?locItems.map(x=>`<div class="lcrow"><div><span class="tagl">${t(ENT[x.e])}</span>${t(x.t)}</div><span class="pill ${x.s?'p-good':'p-warn'}">${u(x.s?'loc_live':'loc_rev')}</span>${x.s?'':`<button class="btn" type="button" data-act="lapprove" data-v="${LOC.indexOf(x)}">${u('loc_ok')}</button>`}</div>`).join(''):`<p class="sub">${u('loc_none')}</p>`}
+  <form class="form" id="lcform" style="margin-top:10px"><select id="lcb" aria-label="${u('sc_brand')}">${BI.map(i=>`<option value="${i}" ${(S.brand===i||(S.brand==='all'&&i===0))?'selected':''}>${t(ENT[i])}</option>`).join('')}</select><input id="lcq" type="text" placeholder="${u('loc_ph')}" aria-label="${u('loc_ph')}"><button class="btn pri" type="submit">${u('loc_add')}</button></form>`;
  const [mj,mn]=sel.ver.slice(1).split('.').map(Number);
  const cl=[[sel.ver,sel.date,'cl1'],[`v${mj}.${Math.max(mn-1,0)}`,'—','cl2'],[`v${Math.max(mj-1,1)}.0`,'—','cl3']];
  const clh=cl.map((c,i)=>`<tr><td class="mono">${i===0&&st==='review'?c[0]+' (draft)':c[0]}</td><td>${u(c[2])}</td><td class="mono">${c[1]}</td><td>${i===2?`<span class="pill p-mute">retired</span>`:''}</td></tr>`).join('');
@@ -577,7 +619,7 @@ function vCur(){
   <h3 class="s">${u('rollout')}</h3><div class="tw"><table>${ro}</table></div>
   <h3 class="s">${u('obj')}</h3><ul class="plain">${sel.objs.map(o=>`<li>${t(o)}</li>`).join('')}</ul>
   <h3 class="s">${u('flow')}</h3><div class="stack">${B.map(b=>`<i title="${b[1]}" style="flex:${b[1]};background:var(${col[b[0]]})"></i>`).join('')}</div>${tl}
-  <h3 class="s">${u('fg')}</h3><div class="note">${t(sel.concept)}</div>
+  <h3 class="s">${u('fg')}</h3><div class="note">${t(sel.concept)}</div>${locHtml}
   <h3 class="s">${u('qa')}</h3><p class="sub" style="margin:0 0 4px">${u('qa_s')}</p>${checks}
   ${st==='review'?`<div style="margin-top:8px"><button class="btn pri" type="button" data-act="approve" ${all?'':'disabled'}>${u('approve')}</button></div>`:(rel?`<p class="good" style="font-weight:600">${u('released')}</p>`:'')}
   <h3 class="s">${u('cl')}</h3><div class="tw"><table>${clh}</table></div>
@@ -588,7 +630,7 @@ function vCur(){
 function scopedQs(){
  return lobs().flatMap(l=>DATA[l].qs.map((q,i)=>({...q,lob:l,key:l+':'+i}))).map(q=>({...q,pct:S.brand==='all'?q.c:bPct(q,S.brand)})).sort((a,b)=>a.pct-b.pct);
 }
-function vAsm(){
+function vAsm0(){
  const qs=scopedQs(),q=qs.find(x=>x.key===S.qk)||qs[0];S.qk=q.key;
  const a=r1(avg(qs.map(x=>x.pct))),fl=qs.filter(x=>x.pct<60).length,pass=r1(avg(lobs().map(l=>DATA[l].pass[1])));
  const rows=qs.map(x=>`<tr data-act="selq" data-v="${x.key}" class="${x.key===q.key?'sel':''}"><td><span class="tagl">${LN(x.lob)}</span><span class="mono">${x.m}</span><br>${t(x.q)}</td><td style="min-width:130px"><div class="brow" style="grid-template-columns:minmax(0,1fr) 38px;margin:0"><div class="track"><div class="fill ${x.pct<60?'lo':x.pct>=80?'hi':''}" style="width:${x.pct}%"></div><span class="thr"></span></div><span class="val">${x.pct}%</span></div></td><td><span class="pill ${x.pct<60?'p-bad':'p-good'}">${u(x.pct<60?'flag':'ok')}</span></td></tr>`).join('');
@@ -606,6 +648,22 @@ function vAsm(){
  </section></div>`;
 }
 
+function loopPanel(){
+ const ls=lobs();
+ const merge=g=>ls.flatMap(l=>LOOP[l][g].map((x,i)=>({...x,l,k:g+':'+l+':'+i}))).sort((a,b)=>b.n-a.n).slice(0,5);
+ const F=merge('f'),Z=merge('z');
+ const list=arr=>arr.map((x,i)=>`<div class="lrow"><span class="rk">${i+1}</span><span class="lt">${t(x.t)}<br><span class="tagl">${LN(x.l)}</span></span><span class="val">${x.n}</span>${PLAN.has(x.k)?`<span class="pill p-good">${u('in_plan')}</span>`:`<button class="btn" type="button" data-act="toplan" data-v="${x.k}">${u('add_plan')}</button>`}</div>`).join('');
+ const find=k=>{const p=k.split(':');return {g:p[0],l:p[1],x:LOOP[p[1]][p[0]][+p[2]],k}};
+ const planned=[...PLAN].map(find).filter(p=>ls.includes(p.l));
+ const mods=[...new Set(ls.flatMap(l=>Object.keys(MU[l].fixes).map(k=>{const q=DATA[l].qs[+k.split(':')[1]];return q?q.m:null}).filter(Boolean)))];
+ const li=(kind,tx,k)=>`<li><span><span class="pk">${u(kind)}</span> ${tx}</span>${k?`<button class="btn" type="button" data-act="unplan" data-v="${k}">${u('rm')}</button>`:''}</li>`;
+ const items=planned.map(p=>li(p.g==='f'?'plan_cap':'plan_kb',t(p.x.t),p.k)).concat(mods.map(m=>li('plan_lp',m,'')));
+ return `<section class="panel"><h2>${u('loop_t')}</h2><p class="sub">${u('loop_s')}</p>
+ <div class="grid g2"><div><h3 class="s">${u('loop_f')}</h3>${list(F)}</div><div><h3 class="s">${u('loop_z')}</h3>${list(Z)}</div></div>
+ <h3 class="s">${u('plan_t')}</h3>${items.length?`<ul class="planl">${items.join('')}</ul>`:`<p class="sub">${u('plan_empty')}</p>`}</section>`;
+}
+function vAsm(){return vAsm0()+loopPanel()}
+function scopedQsX(){return scopedQs()}
 /* ---------- nesting ---------- */
 function vNest(){
  const items=lobs().flatMap(l=>MU[l].trainees.map((x,i)=>({x,l,key:l+':'+i}))).filter(o=>bOK(o.x.e));
@@ -628,10 +686,10 @@ function vNest(){
 function vSync(){
  const names=['KB','LMS','Copilot'];
  const syn=lobs().flatMap(l=>MU[l].sync.map((s,i)=>({s,l,i})));
- const dueTx=s=>s.st.every(v=>v===2)?u('closed'):s.due<0?u('late',{n:-s.due}):u('in_d',{n:s.due});
+ const dueTx=s=>s.st.every(v=>v===2)?u('closed'):s.h<0?u('sla_over',{n:-s.h}):u('sla_left',{n:s.h,t:s.sev==='crit'?48:120});
  const roll=s=>{const n=s.st.reduce((a,b)=>a+b,0);return `<span class="bds">${BI.map(i=>`<i class="bd ${i<n?'ok':'na'} ${S.brand===i?'me':''}" title="${t(ENT[i])}: ${u(i<n?'upd':'pend')}"></i>`).join('')}</span>${S.brand!=='all'?` <span class="pill ${S.brand<n?'p-good':'p-warn'}">${u(S.brand<n?'upd':'pend')}</span>`:''}`};
- const srows=syn.map(({s,l,i})=>{const done=s.st.every(v=>v===2),over=s.due<0&&!done;
-  return `<tr><td><span class="tagl">${LN(l)}</span><span class="mono">${s.id}</span><br>${t(s.t)}</td><td>${t(s.s)}</td><td><div class="pipe">${s.st.map((v,k)=>`<button type="button" class="stg s${v}" data-act="adv" data-l="${l}" data-i="${i}" data-k="${k}" ${v===2?'disabled':''}>${v===2?'✓ ':''}${names[k]}</button>`).join('')}</div></td><td>${roll(s)}</td><td><span class="pill ${done?'p-good':over?'p-bad':'p-warn'}">${dueTx(s)}</span></td></tr>`}).join('');
+ const srows=syn.map(({s,l,i})=>{const done=s.st.every(v=>v===2),over=s.h<0&&!done,tot=s.sev==='crit'?48:120,pc=Math.min(100,Math.max(0,Math.round((1-s.h/tot)*100)));
+  return `<tr><td><span class="tagl">${LN(l)}</span><span class="mono">${s.id}</span> <span class="pill ${s.sev==='crit'?'p-bad':'p-mute'}">${u(s.sev==='crit'?'sev_c':'sev_n')}</span><br>${t(s.t)}</td><td>${t(s.s)}</td><td><div class="pipe">${s.st.map((v,k)=>`<button type="button" class="stg s${v}" data-act="adv" data-l="${l}" data-i="${i}" data-k="${k}" ${v===2||(k===2&&s.cc)?'disabled':''}>${v===2?'✓ ':''}${names[k]}</button>`).join('')}</div><span class="sub" style="margin:6px 0 0;display:block">${u('cc_l')}: ${s.cc?`<b class="bad">${u('cc_n',{n:s.cc})}</b> <button class="btn" type="button" data-act="rescc" data-l="${l}" data-i="${i}">${u('cc_fix')}</button>`:`<b class="good">${u('cc_ok')}</b>`} | ${u('retire',{d:s.eff})}</span></td><td>${roll(s)}</td><td><span class="pill ${done?'p-good':over?'p-bad':'p-warn'}">${dueTx(s)}</span>${done?'':`<div class="sla"><i class="${over?'lo':''}" style="width:${pc}%"></i></div>`}</td></tr>`}).join('');
  const logs=lobs().flatMap(l=>MU[l].log.map((c,i)=>({c,l,i}))).filter(o=>bOK(o.c.e));
  const cards=logs.map(({c,l,i})=>{const sts=[['p-warn','st_new'],['p-mute','st_app'],['p-good','st_bc']][c.s];
   return `<div class="lcard"><div class="row-between" style="margin:0"><span class="q">${t(c.q)}</span><span class="pill ${sts[0]}">${u(sts[1])}</span></div>
@@ -640,7 +698,7 @@ function vSync(){
   <div class="row-between" style="margin:0"><div class="ring"><div class="pbar" style="width:120px"><i style="width:${c.ack[1]?c.ack[0]/c.ack[1]*100:0}%"></i></div><span class="sub" style="margin:0">${c.ack[0]}/${c.ack[1]} ${u('ack')}</span></div>
   ${c.s===0?`<button class="btn" type="button" data-act="lapp" data-l="${l}" data-i="${i}">${u('approve_a')}</button>`:c.s===1?`<button class="btn pri" type="button" data-act="lbc" data-l="${l}" data-i="${i}">${u('broadcast')}</button>`:''}</div></div>`}).join('');
  const body=S.stab==='sync'
-  ?(syn.length?`<section class="panel"><div class="tw"><table class="stk"><tr><th>${u('chg')}</th><th>${u('src')}</th><th>${u('pipe')}</th><th>${u('brands_upd')}</th><th>${u('due')}</th></tr>${srows}</table></div></section>`:empty())
+  ?(syn.length?`<div class="note">${u('sla_rule')}</div><section class="panel"><div class="tw"><table class="stk"><tr><th>${u('chg')}</th><th>${u('src')}</th><th>${u('pipe')}</th><th>${u('brands_upd')}</th><th>${u('due')}</th></tr>${srows}</table></div></section>`:empty())
   :`<section class="panel"><form class="form" id="lform"><input id="lq" type="text" placeholder="${u('new_q')}" aria-label="${u('new_q')}"><button class="btn pri" type="submit">${u('add')}</button></form>${logs.length?`<div class="cards">${cards}</div>`:`<p class="empty">${u('empty')}</p>`}</section>`;
  return head('sy_t','sy_d','sy_h')+`<div class="seg" style="justify-self:start"><button type="button" data-act="stab" data-v="sync" aria-pressed="${S.stab==='sync'}">${u('t_sync')}</button><button type="button" data-act="stab" data-v="log" aria-pressed="${S.stab==='log'}">${u('t_log')}</button></div>${body}`;
 }
@@ -689,6 +747,10 @@ document.addEventListener('click',e=>{
  else if(a==='stab')S.stab=v;
  else if(a==='adv'){const s=MU[b.dataset.l].sync[+b.dataset.i],k=+b.dataset.k;if(s.st[k]<2)s.st[k]++}
  else if(a==='lapp'){const c=MU[b.dataset.l].log[+b.dataset.i];c.s=1;if(!c.a)c.a=L('Approved by the curriculum owner. Full guidance is published in the KB.','معتمدة من مسؤول المنهج. الإرشاد الكامل منشور في قاعدة المعرفة.')}
+ else if(a==='rescc'){MU[b.dataset.l].sync[+b.dataset.i].cc=0}
+ else if(a==='lapprove'){LOC[+v].s=1}
+ else if(a==='toplan'){PLAN.add(v)}
+ else if(a==='unplan'){PLAN.delete(v)}
  else if(a==='lbc'){const c=MU[b.dataset.l].log[+b.dataset.i];c.s=2;c.ack=[Math.min(2,c.ack[1]),c.ack[1]]}
  render();
 });
@@ -697,6 +759,7 @@ document.addEventListener('change',e=>{
  else if(e.target.id==='sl'){S.lob=e.target.value;render()}
 });
 document.addEventListener('submit',e=>{
+ if(e.target.id==='lcform'){e.preventDefault();const q=document.getElementById('lcq').value.trim();if(!q)return;LOC.push({m:S.mod,e:+document.getElementById('lcb').value,t:L(q,q),s:0});render();return}
  if(e.target.id!=='lform')return;e.preventDefault();
  const inp=document.getElementById('lq'),val=inp.value.trim();if(!val)return;
  const l=S.lob==='all'?'cs':S.lob;
