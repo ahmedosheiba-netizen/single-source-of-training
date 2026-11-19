@@ -236,6 +236,29 @@ tr.grp td{background:var(--surface2);font-weight:600;color:var(--head);font-size
   table.hm td.rh{width:30%}
 }
 @media(max-width:340px){.tiles{grid-template-columns:minmax(0,1fr)}}
+/* motion */
+@media(prefers-reduced-motion:no-preference){
+.hero{position:relative;overflow:hidden}
+.hero .wrap{position:relative;z-index:1}
+.hero::after{content:"";position:absolute;inset-block:0;inset-inline-end:0;width:min(64%,780px);background:url("data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%20900%20300'%3E%3Cstyle%3E.r%7Bfill%3Anone%3Bstroke%3A%23fff%3Bstroke-opacity%3A.3%3Bstroke-width%3A2%3Bstroke-dasharray%3A6%2010%3Banimation%3Ad%203s%20linear%20infinite%7D%40keyframes%20d%7Bto%7Bstroke-dashoffset%3A-64%7D%7D.p%7Bfill%3A%23D61F26%3Btransform-box%3Afill-box%3Btransform-origin%3Acenter%3Banimation%3Ap%202.4s%20ease-out%20infinite%7D%40keyframes%20p%7B0%25%7Btransform%3Ascale(1)%3Bopacity%3A.9%7D100%25%7Btransform%3Ascale(2.8)%3Bopacity%3A0%7D%7D%3C%2Fstyle%3E%3Cpath%20id%3D'a'%20class%3D'r'%20d%3D'M40%20240%20C200%20240%20220%2080%20380%20100%20S600%20220%20720%20120%20S850%2060%20870%2060'%2F%3E%3Cpath%20id%3D'b'%20class%3D'r'%20d%3D'M40%20150%20C160%20150%20200%20210%20330%20190%20S520%2060%20660%2070%20S820%20160%20870%20150'%2F%3E%3Cpath%20id%3D'c'%20class%3D'r'%20d%3D'M120%20280%20C300%20270%20360%20200%20500%20210%20S740%20270%20870%20230'%2F%3E%3Cg%20fill%3D'%23fff'%20fill-opacity%3D'.9'%3E%3Ccircle%20cx%3D'380'%20cy%3D'100'%20r%3D'6'%2F%3E%3Ccircle%20cx%3D'720'%20cy%3D'120'%20r%3D'6'%2F%3E%3Ccircle%20cx%3D'330'%20cy%3D'190'%20r%3D'6'%2F%3E%3Ccircle%20cx%3D'660'%20cy%3D'70'%20r%3D'6'%2F%3E%3Ccircle%20cx%3D'500'%20cy%3D'210'%20r%3D'6'%2F%3E%3Ccircle%20cx%3D'870'%20cy%3D'150'%20r%3D'6'%2F%3E%3C%2Fg%3E%3Ccircle%20class%3D'p'%20cx%3D'380'%20cy%3D'100'%20r%3D'7'%2F%3E%3Ccircle%20class%3D'p'%20style%3D'animation-delay%3A.8s'%20cx%3D'660'%20cy%3D'70'%20r%3D'7'%2F%3E%3Ccircle%20class%3D'p'%20style%3D'animation-delay%3A1.6s'%20cx%3D'500'%20cy%3D'210'%20r%3D'7'%2F%3E%3Ccircle%20r%3D'5'%20fill%3D'%23FF9A9E'%3E%3CanimateMotion%20dur%3D'7s'%20repeatCount%3D'indefinite'%3E%3Cmpath%20href%3D'%23a'%2F%3E%3C%2FanimateMotion%3E%3C%2Fcircle%3E%3Ccircle%20r%3D'5'%20fill%3D'%23FF9A9E'%3E%3CanimateMotion%20dur%3D'9s'%20repeatCount%3D'indefinite'%3E%3Cmpath%20href%3D'%23b'%2F%3E%3C%2FanimateMotion%3E%3C%2Fcircle%3E%3Ccircle%20r%3D'5'%20fill%3D'%23FF9A9E'%3E%3CanimateMotion%20dur%3D'8s'%20repeatCount%3D'indefinite'%3E%3Cmpath%20href%3D'%23c'%2F%3E%3C%2FanimateMotion%3E%3C%2Fcircle%3E%3C%2Fsvg%3E") no-repeat right center/contain;opacity:.6;pointer-events:none}
+[dir=rtl] .hero::after{transform:scaleX(-1)}
+@media(max-width:720px){.hero::after{width:100%;opacity:.22}}
+@keyframes sstUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes sstGrow{from{width:0}}
+@keyframes sstGrowX{from{transform:scaleX(0)}}
+@keyframes sstFade{from{opacity:0}to{opacity:1}}
+@keyframes sstPulse{0%,100%{box-shadow:0 0 0 0 rgba(214,31,38,.0)}50%{box-shadow:0 0 0 5px rgba(214,31,38,.18)}}
+#app.enter .panel,#app.enter .tile,#app.enter .lcard{animation:sstUp .5s cubic-bezier(.2,.7,.2,1) backwards}
+#app.enter .tile:nth-child(2){animation-delay:.06s}#app.enter .tile:nth-child(3){animation-delay:.12s}#app.enter .tile:nth-child(4){animation-delay:.18s}#app.enter .tile:nth-child(5){animation-delay:.24s}
+#app.enter .panel:nth-of-type(2){animation-delay:.1s}#app.enter .panel:nth-of-type(3){animation-delay:.2s}
+#app.enter .fill,#app.enter .pbar i{animation:sstGrow .9s cubic-bezier(.2,.7,.2,1) .15s backwards}
+#app.enter .stack i{transform-origin:left center;animation:sstGrowX .8s cubic-bezier(.2,.7,.2,1) .15s backwards}
+[dir=rtl] #app.enter .stack i{transform-origin:right center}
+#app.enter table.hm td{animation:sstFade .6s ease backwards}
+#app.enter table.hm tr:nth-child(2) td{animation-delay:.1s}#app.enter table.hm tr:nth-child(3) td{animation-delay:.2s}#app.enter table.hm tr:nth-child(4) td{animation-delay:.3s}#app.enter table.hm tr:nth-child(5) td{animation-delay:.4s}#app.enter table.hm tr:nth-child(6) td{animation-delay:.5s}#app.enter table.hm tr:nth-child(7) td{animation-delay:.6s}
+.stg.s1{animation:sstPulse 2.2s ease-in-out infinite}
+.tabs button[aria-current="page"]{animation:sstFade .3s ease}
+}
 </style>
 
 <header class="top"><div class="wrap topbar">
@@ -594,7 +617,8 @@ function scopeHtml(){
  const on=S.brand!=='all'||S.lob!=='all';
  return `<label>${u('sc_brand')}<select id="sb">${bo}</select></label><label>${u('sc_lob')}<select id="sl">${lo}</select></label>${on?`<button class="btn" type="button" data-act="reset">${u('sc_reset')}</button>`:''}<span class="showing">${u('sc_show')}: <b>${scopeTxt()}</b></span>`;
 }
-function render(){
+function playEnter(){const a=document.getElementById('app');a.classList.remove('enter');void a.offsetWidth;a.classList.add('enter');clearTimeout(window._et);window._et=setTimeout(()=>a.classList.remove('enter'),1400);countUp()}
+function countUp(){if(window.matchMedia&&matchMedia('(prefers-reduced-motion:reduce)').matches)return;document.querySelectorAll('#app .tile .v,#app .spreadbox b').forEach(el=>{if(el.children.length)return;const txt=el.textContent,m=txt.match(/-?\d+(\.\d+)?/);if(!m)return;const end=parseFloat(m[0]),dec=m[1]?m[1].length-1:0,pre=txt.slice(0,m.index),post=txt.slice(m.index+m[0].length),t0=performance.now();(function step(now){const p=Math.min(1,(now-t0)/800),e=1-Math.pow(1-p,3);if(p<1){el.textContent=pre+(end*e).toFixed(dec)+post;requestAnimationFrame(step)}else el.textContent=txt})(t0)})}function render(){
  document.documentElement.lang=lang;document.documentElement.dir=lang==='ar'?'rtl':'ltr';
  document.getElementById('appname').textContent=u('app');document.getElementById('demo').textContent=u('demo');document.getElementById('tagline').textContent=u('tag');
  document.title=u('app');
@@ -603,6 +627,7 @@ function render(){
  document.getElementById('scope').innerHTML=scopeHtml();
  const v=TABS.find(x=>x[0]===S.tab)||TABS[0];
  document.getElementById('app').innerHTML=v[3]()+`<p class="foot">${u('foot')}</p>`;
+ const sig=S.tab+'|'+S.brand+'|'+S.lob+'|'+lang;if(sig!==window._sig){window._sig=sig;playEnter()}
 }
 function go(tab){S.tab=tab;try{history.replaceState(null,'','#'+tab)}catch(e){location.hash=tab}render();window.scrollTo(0,0)}
 document.addEventListener('click',e=>{
