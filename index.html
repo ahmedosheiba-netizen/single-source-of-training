@@ -1,4 +1,9 @@
 <meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<meta name="description" content="Interview prototype: one approved version of training and knowledge for six brands. Fictional data.">
+<meta property="og:type" content="website"><meta property="og:title" content="Single Source of Training"><meta property="og:description" content="Interview prototype: one approved version of training and knowledge for six brands. Fictional data.">
+<meta property="og:image" content="https://ahmedosheiba-netizen.github.io/single-source-of-training/og.png"><meta name="twitter:card" content="summary_large_image">
 <title>Single Source of Training</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Noto+Sans+Arabic:wght@400;500;600;700&display=swap">
@@ -289,13 +294,14 @@ tr.grp td{background:var(--surface2);font-weight:600;color:var(--head);font-size
 .brandrow span.p{background:#FB0050}.brandrow span.p img{max-width:88%}
 .brandrow span.bm{width:55px;background:none}.brandrow span.bm img{max-width:none;max-height:none;width:100%;height:100%;object-fit:cover;border-radius:11px}
 @media(max-width:480px){.brandrow span{width:64px;height:34px}.brandrow span.bm{width:44px}}
+.tright{display:flex;align-items:center;gap:10px}.acad{font-weight:600;font-size:14px;color:var(--head);text-decoration:none;padding:8px 14px;border-radius:9999px;border:1px solid var(--line);background:var(--surface)}.acad:hover{background:var(--surface2)}
 </style>
 
 <header class="top"><div class="wrap topbar">
   <div class="brand"><span class="mk">SST</span><b>Delivery Hero</b></div>
-  <div class="seg" id="langseg" role="group" aria-label="Language">
+  <div class="tright"><a class="acad" id="acad" href="academy.html">Academy</a><div class="seg" id="langseg" role="group" aria-label="Language">
       <button data-lang="en" type="button">EN</button><button data-lang="ar" type="button">عربي</button>
-    </div>
+    </div></div>
 </div></header>
 <section class="hero"><div class="orbit" aria-hidden="true"><div class="core"><span>SST</span></div><div class="ring"></div></div><div class="wrap">
   <h1 class="hname" id="appname"></h1>
@@ -358,7 +364,7 @@ const U={
  st_new:['Awaiting answer','بانتظار الإجابة'],st_app:['Answer approved','الإجابة معتمدة'],st_bc:['Sent to all trainers','أُرسلت لكل المدرّبين'],
  approve_a:['Approve answer','اعتماد الإجابة'],broadcast:['Send to all trainers','إرسال لكل المدرّبين'],ack:['acknowledged','أكدوا الاستلام'],
  raised:['Raised by {n} in {e}','سجّلها {n} في {e}'],pend_ans:['The curriculum owner has not answered yet.','لم يردّ مسؤول المنهج بعد.'],
- foot:['Prototype with fictional data. Built to show the approach, not to report real results.','نموذج أولي ببيانات خيالية. الهدف عرض الفكرة وليس عرض نتائج حقيقية.']
+ foot:['Prototype with fictional data. Built to show the approach, not to report real results. A concept prototype, not an official product of Delivery Hero or any brand. Logos belong to their owners.','نموذج أولي ببيانات خيالية. الهدف عرض الفكرة وليس عرض نتائج حقيقية. هذا نموذج لفكرة وليس منتجًا رسميًا لـ Delivery Hero أو أي علامة تجارية. الشعارات ملك أصحابها.']
 };
 const u=(k,v)=>{let s=U[k][lang==='en'?0:1];if(v)for(const a in v)s=s.replace('{'+a+'}',v[a]);return s};
 
@@ -470,7 +476,7 @@ Object.assign(U,{
  sy_t:['Changes and learning log','التغييرات وسجل التعلّم'],sy_d:['Track every SOP change from source to KB, LMS, Copilot and every brand, and share what trainers learn in class.','تتبّع كل تغيير في الإجراءات من المصدر حتى القاعدة والـLMS والـCopilot وكل براند، وشارك ما يتعلمه المدرّبون.'],
  sy_h:['SOP changes: click a stage to move it forward. Learning log: record a question, approve the answer, then send it to every trainer.','التغييرات: اضغط مرحلة لتتقدّم. سجل التعلّم: سجّل سؤالاً واعتمد الإجابة ثم أرسلها لكل المدرّبين.'],
  brands_upd:['Brands updated','البراندات المحدّثة'],upd:['Updated','تم التحديث'],pend:['Pending','قيد الانتظار'],
- foot:['Prototype with fictional data. Built to show the approach, not to report real results.','نموذج أولي ببيانات خيالية. الهدف عرض الفكرة وليس عرض نتائج حقيقية.']
+ foot:['Prototype with fictional data. Built to show the approach, not to report real results. A concept prototype, not an official product of Delivery Hero or any brand. Logos belong to their owners.','نموذج أولي ببيانات خيالية. الهدف عرض الفكرة وليس عرض نتائج حقيقية. هذا نموذج لفكرة وليس منتجًا رسميًا لـ Delivery Hero أو أي علامة تجارية. الشعارات ملك أصحابها.']
 });
 
 const S={brand:'all',lob:'all',tab:'overview',mode:'now',mod:'CS-101',qk:null,tk:null,stab:'sync'};
@@ -650,7 +656,7 @@ function scopeHtml(){
 function playEnter(){const a=document.getElementById('app');a.classList.remove('enter');void a.offsetWidth;a.classList.add('enter');clearTimeout(window._et);window._et=setTimeout(()=>a.classList.remove('enter'),1400);countUp()}
 function countUp(){if(window.matchMedia&&matchMedia('(prefers-reduced-motion:reduce)').matches)return;document.querySelectorAll('#app .tile .v,#app .spreadbox b').forEach(el=>{if(el.children.length)return;const txt=el.textContent,m=txt.match(/-?\d+(\.\d+)?/);if(!m)return;const end=parseFloat(m[0]),dec=m[1]?m[1].length-1:0,pre=txt.slice(0,m.index),post=txt.slice(m.index+m[0].length),t0=performance.now();(function step(now){const p=Math.min(1,(now-t0)/800),e=1-Math.pow(1-p,3);if(p<1){el.textContent=pre+(end*e).toFixed(dec)+post;requestAnimationFrame(step)}else el.textContent=txt})(t0)})}function render(){
  document.documentElement.lang=lang;document.documentElement.dir=lang==='ar'?'rtl':'ltr';
- document.getElementById('appname').textContent=u('app');document.getElementById('demo').textContent=u('demo');document.getElementById('tagline').textContent=u('tag');
+ document.getElementById('appname').textContent=u('app');document.getElementById('acad').textContent=lang==='ar'?'الأكاديمية':'Academy';document.getElementById('demo').textContent=u('demo');document.getElementById('tagline').textContent=u('tag');
  document.title=u('app');
  document.querySelectorAll('#langseg button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.lang===lang)));
  document.getElementById('tabs').innerHTML=TABS.map(x=>`<button type="button" data-act="goto" data-v="${x[0]}" ${S.tab===x[0]?'aria-current="page"':''}>${u(x[1])}<small>${u(x[2])}</small></button>`).join('');

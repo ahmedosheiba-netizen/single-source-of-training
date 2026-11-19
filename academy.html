@@ -1,4 +1,4 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Global Training Academy</title>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><meta name="description" content="Course catalog prototype for six brands. Fictional data."><meta property="og:type" content="website"><meta property="og:title" content="Global Training Academy"><meta property="og:description" content="Course catalog prototype for six brands. Fictional data."><meta property="og:image" content="https://ahmedosheiba-netizen.github.io/single-source-of-training/og.png"><meta name="twitter:card" content="summary_large_image"><title>Global Training Academy</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;600;700;800&display=swap">
 <style>
@@ -260,7 +260,7 @@ const U={
  none:L('No courses match. Try another brand or clear the filters.','لا توجد كورسات مطابقة. جرّب براندًا آخر أو امسح التصفية.'),
  prev:L('Previous','السابق'),next:L('Next','التالي'),
  ctaT:L('See how the content stays in sync','شاهد كيف يبقى المحتوى متزامنًا'),ctaS:L('Open the Single Source of Training prototype: curriculum, assessments, nesting and the change log.','افتح نموذج Single Source of Training: المنهج والتقييمات والنزول للعمل وسجل التغييرات.'),ctaB:L('Open the prototype','افتح النموذج'),
- foot:L('© Global Training Academy. Fictional data for demonstration.','© أكاديمية التدريب العالمية. بيانات وهمية للعرض.'),
+ foot:L('© Global Training Academy. Fictional data for demonstration. A concept prototype, not an official product of Delivery Hero or any brand. Logos belong to their owners.','© أكاديمية التدريب العالمية. بيانات وهمية للعرض. هذا نموذج لفكرة وليس منتجًا رسميًا لـ Delivery Hero أو أي علامة تجارية. الشعارات ملك أصحابها.'),
  close:L('Close','إغلاق'),
  obj:L('What learners can do after the course','ماذا يستطيع المتدرب بعد الكورس'),
  avail:L('Available in','متاح في'),
@@ -268,7 +268,7 @@ const U={
  dur:L('Duration','المدة'),lvl:L('Level','المستوى'),ver:L('Version','النسخة'),own:L('Owner','المالك'),line:L('Line of business','خط العمل'),type:L('Type','النوع'),
  live:L('live','متاح'),soon:L('not yet','غير متاح'),
  seg:[['Opening','افتتاح',10],['Explanation','شرح',25],['Practice','تطبيق',30],['Knowledge check','اختبار',15],['Wrap-up','ختام',10]],
- links:[L('About the Academy','عن الأكاديمية'),L('Course owners','مالكو الكورسات'),L('Suggest a course','اقترح كورسًا')]
+ links:[[L('Prototype: Single Source of Training','النموذج: Single Source of Training'),'https://ahmedosheiba-netizen.github.io/single-source-of-training/'],[L('Source code on GitHub','الكود على GitHub'),'https://github.com/ahmedosheiba-netizen/single-source-of-training']]
 };
 let lang='e';try{lang=localStorage.getItem('gta-lang')||'e'}catch(e){}
 const S={brand:-1,lob:'',type:'',q:'',page:1};
@@ -302,7 +302,7 @@ function countUp(){if(window.matchMedia&&matchMedia('(prefers-reduced-motion:red
   $('featT').textContent=t(U.featT);$('featS').textContent=t(U.featS);$('allT').textContent=t(U.allT);$('allS').textContent=t(U.allS);
   $('lLob').textContent=t(U.lLob);$('lType').textContent=t(U.lType);$('lQ').textContent=t(U.lQ);$('reset').textContent=t(U.reset);
   $('ctaT').textContent=t(U.ctaT);$('ctaS').textContent=t(U.ctaS);$('ctaB').textContent=t(U.ctaB);$('foot').textContent=t(U.foot);
-  $('flinks').innerHTML=U.links.map(l=>'<a href="#" onclick="return false">'+esc(t(l))+'</a>').join('');
+  $('flinks').innerHTML=U.links.map(l=>'<a href="'+l[1]+'" target="_blank" rel="noopener">'+esc(t(l[0]))+'</a>').join('');
   // tiles
   $('tiles').innerHTML=BR.map((b,i)=>{const n=C.filter(c=>c.b.includes(i)).length;
     return '<button class="tile" type="button" data-b="'+i+'" aria-pressed="'+(S.brand===i)+'"><span class="lg lg'+i+'"><img src="'+LOGO[i]+'" alt=""></span>'+esc(b)+'<small>'+n+' '+esc(t(U.courses))+'</small></button>'}).join('');
