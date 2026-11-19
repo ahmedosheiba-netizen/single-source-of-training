@@ -259,6 +259,21 @@ tr.grp td{background:var(--surface2);font-weight:600;color:var(--head);font-size
 .stg.s1{animation:sstPulse 2.2s ease-in-out infinite}
 .tabs button[aria-current="page"]{animation:sstFade .3s ease}
 }
+/* orbit */
+@media(prefers-reduced-motion:no-preference){
+.orbit{position:absolute;inset-inline-end:-30px;top:50%;width:540px;height:540px;margin-top:-270px;z-index:0;pointer-events:none}
+.orbit .ring{position:absolute;inset:0;border:2px dashed rgba(255,255,255,.3);border-radius:50%;animation:orbSpin 50s linear infinite}
+.orbit .ring::after{content:"";position:absolute;inset:70px;border:1.5px solid rgba(255,255,255,.14);border-radius:50%}
+.orbit .ring i{position:absolute;left:50%;top:50%;width:68px;height:68px;margin:-34px 0 0 -34px;transform:rotate(var(--a)) translateX(270px) rotate(calc(-1*var(--a)))}
+.orbit .ring i b{display:grid;place-items:center;width:100%;height:100%;border-radius:50%;background:#fff;color:#343B46;font:800 15px/1 'Figtree',system-ui,sans-serif;box-shadow:0 8px 24px rgba(0,0,0,.25);animation:orbUnspin 50s linear infinite}
+.orbit .ring i.hot b{background:#D61F26;color:#fff}
+.orbit .core{position:absolute;left:50%;top:50%;width:120px;height:120px;margin:-60px 0 0 -60px;border-radius:50%;background:#D61F26;display:grid;place-items:center;color:#fff;font:800 24px/1 'Figtree',system-ui,sans-serif;letter-spacing:1px;animation:orbPulse 3s ease-out infinite}
+@keyframes orbSpin{to{transform:rotate(360deg)}}
+@keyframes orbUnspin{to{transform:rotate(-360deg)}}
+@keyframes orbPulse{0%{box-shadow:0 0 0 0 rgba(214,31,38,.55)}100%{box-shadow:0 0 0 70px rgba(214,31,38,0)}}
+@media(max-width:900px){.orbit{width:400px;height:400px;margin-top:-200px;inset-inline-end:-190px;opacity:.5}.orbit .ring i{width:52px;height:52px;margin:-26px 0 0 -26px;transform:rotate(var(--a)) translateX(200px) rotate(calc(-1*var(--a)))}.orbit .ring i b{font-size:12px}.orbit .core{width:90px;height:90px;margin:-45px 0 0 -45px;font-size:19px}}
+@media(max-width:560px){.orbit{opacity:.25}}
+}
 </style>
 
 <header class="top"><div class="wrap topbar">
@@ -267,7 +282,7 @@ tr.grp td{background:var(--surface2);font-weight:600;color:var(--head);font-size
       <button data-lang="en" type="button">EN</button><button data-lang="ar" type="button">عربي</button>
     </div>
 </div></header>
-<section class="hero"><div class="wrap">
+<section class="hero"><div class="orbit" aria-hidden="true"><div class="core"><span>SST</span></div><div class="ring"><i style="--a:0deg" class="hot"><b>TLB</b></i><i style="--a:60deg"><b>HS</b></i><i style="--a:120deg"><b>GLV</b></i><i style="--a:180deg"><b>PY</b></i><i style="--a:240deg"><b>FP</b></i><i style="--a:300deg"><b>BM</b></i></div></div><div class="wrap">
   <h1 class="hname" id="appname"></h1>
   <p class="tag" id="tagline"></p>
   <div class="heroctl"><span class="demo" id="demo"></span></div>

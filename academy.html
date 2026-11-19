@@ -86,7 +86,7 @@ footer a{font-weight:700;color:var(--ink)}
 .course{transition:transform .15s,box-shadow .15s}.course:hover{transform:translateY(-3px);box-shadow:0 10px 24px rgba(43,49,59,.10)}
 .hero{position:relative;overflow:hidden}
 .hero>*{position:relative;z-index:1}
-.hero::after{content:"";position:absolute;inset-block:0;inset-inline-end:0;width:min(60%,740px);background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%23667085' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat right center/contain;opacity:.5;pointer-events:none;z-index:0}
+.hero::after{content:"";position:absolute;inset-block:0;inset-inline-end:0;width:min(60%,740px);background:url("data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%20900%20300'%3E%3Cstyle%3E.r%7Bfill%3Anone%3Bstroke%3A%23fff%3Bstroke-opacity%3A.3%3Bstroke-width%3A2%3Bstroke-dasharray%3A6%2010%3Banimation%3Ad%203s%20linear%20infinite%7D%40keyframes%20d%7Bto%7Bstroke-dashoffset%3A-64%7D%7D.p%7Bfill%3A%23D61F26%3Btransform-box%3Afill-box%3Btransform-origin%3Acenter%3Banimation%3Ap%202.4s%20ease-out%20infinite%7D%40keyframes%20p%7B0%25%7Btransform%3Ascale(1)%3Bopacity%3A.9%7D100%25%7Btransform%3Ascale(2.8)%3Bopacity%3A0%7D%7D%3C%2Fstyle%3E%3Cpath%20id%3D'a'%20class%3D'r'%20d%3D'M40%20240%20C200%20240%20220%2080%20380%20100%20S600%20220%20720%20120%20S850%2060%20870%2060'%2F%3E%3Cpath%20id%3D'b'%20class%3D'r'%20d%3D'M40%20150%20C160%20150%20200%20210%20330%20190%20S520%2060%20660%2070%20S820%20160%20870%20150'%2F%3E%3Cpath%20id%3D'c'%20class%3D'r'%20d%3D'M120%20280%20C300%20270%20360%20200%20500%20210%20S740%20270%20870%20230'%2F%3E%3Cg%20fill%3D'%23fff'%20fill-opacity%3D'.9'%3E%3Ccircle%20cx%3D'380'%20cy%3D'100'%20r%3D'6'%2F%3E%3Ccircle%20cx%3D'720'%20cy%3D'120'%20r%3D'6'%2F%3E%3Ccircle%20cx%3D'330'%20cy%3D'190'%20r%3D'6'%2F%3E%3Ccircle%20cx%3D'660'%20cy%3D'70'%20r%3D'6'%2F%3E%3Ccircle%20cx%3D'500'%20cy%3D'210'%20r%3D'6'%2F%3E%3Ccircle%20cx%3D'870'%20cy%3D'150'%20r%3D'6'%2F%3E%3C%2Fg%3E%3Ccircle%20class%3D'p'%20cx%3D'380'%20cy%3D'100'%20r%3D'7'%2F%3E%3Ccircle%20class%3D'p'%20style%3D'animation-delay%3A.8s'%20cx%3D'660'%20cy%3D'70'%20r%3D'7'%2F%3E%3Ccircle%20class%3D'p'%20style%3D'animation-delay%3A1.6s'%20cx%3D'500'%20cy%3D'210'%20r%3D'7'%2F%3E%3Ccircle%20r%3D'5'%20fill%3D'%23FF9A9E'%3E%3CanimateMotion%20dur%3D'7s'%20repeatCount%3D'indefinite'%3E%3Cmpath%20href%3D'%23a'%2F%3E%3C%2FanimateMotion%3E%3C%2Fcircle%3E%3Ccircle%20r%3D'5'%20fill%3D'%23FF9A9E'%3E%3CanimateMotion%20dur%3D'9s'%20repeatCount%3D'indefinite'%3E%3Cmpath%20href%3D'%23b'%2F%3E%3C%2FanimateMotion%3E%3C%2Fcircle%3E%3Ccircle%20r%3D'5'%20fill%3D'%23FF9A9E'%3E%3CanimateMotion%20dur%3D'8s'%20repeatCount%3D'indefinite'%3E%3Cmpath%20href%3D'%23c'%2F%3E%3C%2FanimateMotion%3E%3C%2Fcircle%3E%3C%2Fsvg%3E") no-repeat right center/contain;opacity:.5;pointer-events:none;z-index:0}
 [dir=rtl] .hero::after{transform:scaleX(-1)}
 @media(max-width:720px){.hero::after{width:100%;opacity:.2}}
 @keyframes gtaRise{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
@@ -104,6 +104,21 @@ footer a{font-weight:700;color:var(--ink)}
 }
 @keyframes gtaFade{from{opacity:0}to{opacity:1}}
 [dir=rtl] .panel{--sx:-40px}
+/* orbit */
+@media(prefers-reduced-motion:no-preference){
+.orbit{position:absolute;inset-inline-end:-240px;top:50%;width:540px;height:540px;margin-top:-270px;z-index:0;pointer-events:none}
+.orbit .ring{position:absolute;inset:0;border:2px dashed rgba(255,255,255,.3);border-radius:50%;animation:orbSpin 50s linear infinite}
+.orbit .ring::after{content:"";position:absolute;inset:70px;border:1.5px solid rgba(255,255,255,.14);border-radius:50%}
+.orbit .ring i{position:absolute;left:50%;top:50%;width:68px;height:68px;margin:-34px 0 0 -34px;transform:rotate(var(--a)) translateX(270px) rotate(calc(-1*var(--a)))}
+.orbit .ring i b{display:grid;place-items:center;width:100%;height:100%;border-radius:50%;background:#fff;color:#343B46;font:800 15px/1 'Figtree',system-ui,sans-serif;box-shadow:0 8px 24px rgba(0,0,0,.25);animation:orbUnspin 50s linear infinite}
+.orbit .ring i.hot b{background:#D61F26;color:#fff}
+.orbit .core{position:absolute;left:50%;top:50%;width:120px;height:120px;margin:-60px 0 0 -60px;border-radius:50%;background:#D61F26;display:grid;place-items:center;color:#fff;font:800 24px/1 'Figtree',system-ui,sans-serif;letter-spacing:1px;animation:orbPulse 3s ease-out infinite}
+@keyframes orbSpin{to{transform:rotate(360deg)}}
+@keyframes orbUnspin{to{transform:rotate(-360deg)}}
+@keyframes orbPulse{0%{box-shadow:0 0 0 0 rgba(214,31,38,.55)}100%{box-shadow:0 0 0 70px rgba(214,31,38,0)}}
+@media(max-width:900px){.orbit{width:400px;height:400px;margin-top:-200px;inset-inline-end:-190px;opacity:.5}.orbit .ring i{width:52px;height:52px;margin:-26px 0 0 -26px;transform:rotate(var(--a)) translateX(200px) rotate(calc(-1*var(--a)))}.orbit .ring i b{font-size:12px}.orbit .core{width:90px;height:90px;margin:-45px 0 0 -45px;font-size:19px}}
+@media(max-width:560px){.orbit{opacity:.25}}
+}
 html,body{margin:0}</style></head><body>
 
 <div class="wrap">
@@ -112,7 +127,7 @@ html,body{margin:0}</style></head><body>
     <button class="langbtn" id="langBtn" type="button"></button>
   </header>
 
-  <section class="hero" aria-labelledby="h1">
+  <section class="hero" aria-labelledby="h1"><div class="orbit" aria-hidden="true"><div class="core"><span>GTA</span></div><div class="ring"><i style="--a:0deg" class="hot"><b>TLB</b></i><i style="--a:60deg"><b>HS</b></i><i style="--a:120deg"><b>GLV</b></i><i style="--a:180deg"><b>PY</b></i><i style="--a:240deg"><b>FP</b></i><i style="--a:300deg"><b>BM</b></i></div></div>
     <div>
       <div class="eyebrow" id="eyebrow"></div>
       <h1 id="h1"></h1>
