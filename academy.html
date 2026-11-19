@@ -1,0 +1,310 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Global Training Academy</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;600;700;800&display=swap">
+<style>
+/* Layout: catalog page. Hero with brand tiles, featured row, filterable course grid with pagination, detail drawer. Single light look, Delivery Hero palette. */
+:root{
+  --bg:#F7F5F2; --card:#FFFFFF; --ink:#2B313B; --muted:#5B6471; --line:#E3DFD9;
+  --red:#D61F26; --red-d:#B8191F; --dark:#2B313B; --soft:#FBE9EA; --ok:#1F7A4D;
+  --f:'Figtree',system-ui,Arial,sans-serif; color-scheme:light;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f);font-size:16px;line-height:1.5;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0}
+.wrap{max-width:1200px;margin:0 auto}
+a{color:inherit}
+button,select,input{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--red);outline-offset:2px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 0;flex-wrap:wrap}
+.brandmark{display:flex;align-items:center;gap:10px;font-weight:800;font-size:18px}
+.mark{background:var(--red);color:#fff;border-radius:10px;padding:4px 10px;font-weight:800;letter-spacing:.5px}
+.langbtn{background:var(--card);border:1px solid var(--line);border-radius:999px;padding:8px 18px;font-weight:700;cursor:pointer;min-height:40px}
+.langbtn:hover{border-color:var(--red)}
+.hero{background:var(--dark);color:#F7F5F2;border-radius:28px;padding:clamp(24px,5vw,56px);display:grid;gap:28px}
+.eyebrow{font-size:13px;font-weight:700;letter-spacing:2px;color:#FF9A9E;text-transform:uppercase}
+h1{font-size:clamp(30px,5vw,52px);line-height:1.08;font-weight:800;margin:6px 0 14px;text-wrap:balance}
+.hero p{max-width:68ch;color:#C9CFD8;font-size:clamp(16px,1.6vw,19px);margin:0}
+.tiles{display:grid;grid-template-columns:repeat(6,1fr);gap:10px}
+.tile{background:#3A414D;border:2px solid transparent;color:#F7F5F2;border-radius:16px;padding:14px 10px;text-align:center;cursor:pointer;font-weight:700;min-height:64px;display:flex;flex-direction:column;justify-content:center;gap:2px}
+.tile small{font-weight:400;color:#C9CFD8;font-size:13px}
+.tile:hover{border-color:#FF9A9E}
+.tile[aria-pressed=true]{background:var(--red);border-color:var(--red)}
+.tile[aria-pressed=true] small{color:#fff}
+.sec{padding-block:40px 8px}
+.sec h2{font-size:clamp(22px,3vw,30px);font-weight:800;margin:0 0 6px}
+.sub{color:var(--muted);margin:0 0 20px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr));gap:18px}
+.course{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:22px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.course h3{font-size:20px;line-height:1.25;margin:0;font-weight:700}
+.course p{margin:0;color:var(--muted);font-size:15px}
+.tags{display:flex;flex-wrap:wrap;gap:8px}
+.tag{font-size:13px;font-weight:700;border-radius:999px;padding:3px 12px;background:#EFEBE6;color:var(--ink)}
+.tag.lob{background:var(--soft);color:var(--red-d)}
+.meta{display:flex;gap:16px;font-size:14px;color:var(--muted);flex-wrap:wrap}
+.cnt{font-size:14px;color:var(--muted)}
+.more{margin-top:auto;align-self:flex-start;background:none;border:0;padding:6px 0;font-weight:800;color:var(--red);cursor:pointer;letter-spacing:.5px;text-transform:uppercase;font-size:14px}
+.more:hover{color:var(--red-d);text-decoration:underline}
+.course.feat{border-top:5px solid var(--red)}
+.filters{display:flex;flex-wrap:wrap;gap:12px;margin:0 0 20px;align-items:end}
+.fld{display:flex;flex-direction:column;gap:4px;min-width:0}
+.fld label{font-size:13px;font-weight:700;color:var(--muted)}
+.fld select,.fld input{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:9px 14px;min-height:42px;min-width:160px}
+.reset{background:none;border:1px solid var(--line);border-radius:999px;padding:9px 18px;cursor:pointer;font-weight:700;min-height:42px}
+.reset:hover{border-color:var(--red)}
+.pager{display:flex;gap:8px;justify-content:center;align-items:center;margin:28px 0 8px;flex-wrap:wrap}
+.pg{min-width:42px;min-height:42px;border-radius:999px;border:1px solid var(--line);background:var(--card);font-weight:700;cursor:pointer;padding:0 14px}
+.pg[aria-current=page]{background:var(--red);border-color:var(--red);color:#fff}
+.pg:disabled{opacity:.4;cursor:default}
+.empty{background:var(--card);border:1px dashed var(--line);border-radius:20px;padding:32px;text-align:center;color:var(--muted)}
+.cta{margin-top:40px;background:var(--soft);border-radius:24px;padding:clamp(20px,4vw,36px);display:flex;gap:20px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.cta h2{margin:0 0 4px;font-size:24px}
+.cta p{margin:0;color:var(--muted)}
+.btn{background:var(--red);color:#fff;border:0;border-radius:999px;padding:12px 26px;font-weight:800;cursor:pointer;text-decoration:none;display:inline-block;min-height:44px}
+.btn:hover{background:var(--red-d)}
+footer{margin-top:40px;padding:28px 0 40px;border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;color:var(--muted);font-size:14px}
+footer nav{display:flex;gap:18px;flex-wrap:wrap}
+footer a{font-weight:700;color:var(--ink)}
+.note{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:8px 14px;font-size:14px;color:var(--muted);margin-top:16px;display:inline-block}
+/* detail panel */
+.scrim{position:fixed;inset:0;background:rgba(43,49,59,.55);display:flex;justify-content:flex-end;z-index:20}
+.panel{background:var(--bg);width:min(560px,100%);height:100%;overflow-y:auto;padding:24px max(20px,env(safe-area-inset-right,0px)) 40px 24px;display:flex;flex-direction:column;gap:16px}
+.panel h2{font-size:28px;line-height:1.15;margin:0}
+.panel h4{margin:8px 0 4px;font-size:14px;letter-spacing:1px;text-transform:uppercase;color:var(--red-d)}
+.panel ul{margin:0;padding-inline-start:20px;display:grid;gap:4px}
+.close{align-self:flex-end;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:8px 18px;font-weight:700;cursor:pointer;min-height:40px}
+.avail{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border-radius:999px;padding:5px 14px;font-size:14px;font-weight:700}
+.chip.on{background:#E3F3EA;color:var(--ok)}
+.chip.off{background:#EFEBE6;color:var(--muted)}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:6px 18px;font-size:15px}
+.kv dt{color:var(--muted)} .kv dd{margin:0;font-weight:600}
+.bar{display:flex;border-radius:12px;overflow:hidden;min-height:44px}
+.bar span{display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;background:var(--dark);padding:4px;text-align:center}
+.bar span:nth-child(odd){background:var(--red)}
+@media(max-width:900px){.tiles{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:480px){.tiles{grid-template-columns:repeat(2,1fr)}.fld,.fld select,.fld input{width:100%}.fld{flex:1 1 100%}}
+@media(prefers-reduced-motion:no-preference){.course{transition:transform .15s,box-shadow .15s}.course:hover{transform:translateY(-3px);box-shadow:0 10px 24px rgba(43,49,59,.10)}}
+html,body{margin:0}</style></head><body>
+
+<div class="wrap">
+  <header class="top">
+    <div class="brandmark"><span class="mark">GTA</span><span id="brandName"></span></div>
+    <button class="langbtn" id="langBtn" type="button"></button>
+  </header>
+
+  <section class="hero" aria-labelledby="h1">
+    <div>
+      <div class="eyebrow" id="eyebrow"></div>
+      <h1 id="h1"></h1>
+      <p id="intro"></p>
+      <span class="note" id="demo"></span>
+    </div>
+    <div>
+      <div class="eyebrow" id="pickBrand" style="margin-bottom:10px"></div>
+      <div class="tiles" id="tiles" role="group"></div>
+    </div>
+  </section>
+
+  <section class="sec" aria-labelledby="featT">
+    <h2 id="featT"></h2><p class="sub" id="featS"></p>
+    <div class="grid" id="featured"></div>
+  </section>
+
+  <section class="sec" aria-labelledby="allT">
+    <h2 id="allT"></h2><p class="sub" id="allS"></p>
+    <div class="filters">
+      <div class="fld"><label for="fLob" id="lLob"></label><select id="fLob"></select></div>
+      <div class="fld"><label for="fType" id="lType"></label><select id="fType"></select></div>
+      <div class="fld"><label for="fQ" id="lQ"></label><input id="fQ" type="search"></div>
+      <button class="reset" id="reset" type="button"></button>
+    </div>
+    <div class="cnt" id="count" aria-live="polite"></div>
+    <div class="grid" id="all" style="margin-top:12px"></div>
+    <nav class="pager" id="pager" aria-label="Pages"></nav>
+  </section>
+
+  <section class="cta">
+    <div><h2 id="ctaT"></h2><p id="ctaS"></p></div>
+    <a class="btn" id="ctaB" href="https://ahmedosheiba-netizen.github.io/single-source-of-training/" target="_blank" rel="noopener"></a>
+  </section>
+
+  <footer>
+    <span id="foot"></span>
+    <nav id="flinks"></nav>
+  </footer>
+</div>
+
+<div id="drawer" hidden></div>
+
+<script>
+const L=(e,a)=>({e,a});
+const BR=['talabat','HungerStation','Glovo','PedidosYa','foodpanda','Baemin'];
+const LOB={cs:L('Customer Service','خدمة العملاء'),rd:L('Rider','المناديب'),vd:L('Vendor','المطاعم والشركاء'),all:L('All lines','كل الخطوط')};
+const TYPE={newhire:L('New hire','موظف جديد'),refresher:L('Refresher','تنشيطي'),tools:L('Tools','الأدوات'),trainer:L('Trainer','المدربين'),assess:L('Assessment','تقييم')};
+const ALL=[0,1,2,3,4,5];
+const C=[
+{id:'CS-101',lob:'cs',type:'newhire',feat:1,dur:L('5 days','5 أيام'),lvl:L('Foundation','أساسي'),b:ALL,v:'3.2',own:'Global CS Training',
+ t:L('Customer Service Foundations','أساسيات خدمة العملاء'),
+ d:L('The core process every new agent needs: contact flow, tone, tools and first-contact resolution.','العملية الأساسية لكل موظف جديد: مسار التواصل والأسلوب والأدوات وحل المشكلة من أول تواصل.'),
+ o:[L('Follow the standard contact flow end to end','اتباع مسار التواصل القياسي من البداية للنهاية'),L('Find the right article in the knowledge base','إيجاد المقال الصحيح في قاعدة المعرفة'),L('Resolve common cases without escalation','حل الحالات الشائعة بدون تصعيد')]},
+{id:'CS-102',lob:'cs',type:'newhire',dur:L('2 days','يومان'),lvl:L('Core','متوسط'),b:[0,1,2,3,4],v:'2.4',own:'Global CS Training',
+ t:L('Handling Escalations','التعامل مع التصعيد'),
+ d:L('When and how to escalate, and how to keep the customer informed.','متى وكيف تصعّد الحالة، وكيف تبقي العميل على اطلاع.'),
+ o:[L('Recognise cases that need escalation','تمييز الحالات التي تحتاج تصعيدًا'),L('Write a clear hand-off note','كتابة ملاحظة تسليم واضحة'),L('Set the right expectation with the customer','وضع التوقع الصحيح مع العميل')]},
+{id:'RD-101',lob:'rd',type:'newhire',feat:1,dur:L('3 days','3 أيام'),lvl:L('Foundation','أساسي'),b:ALL,v:'4.0',own:'Global Rider Training',
+ t:L('Rider Onboarding and Road Safety','تعريف المناديب والسلامة على الطريق'),
+ d:L('The rider journey from first login to first delivery, with safety rules that stay the same in every market.','رحلة المندوب من أول تسجيل دخول لأول توصيلة، مع قواعد سلامة ثابتة في كل الأسواق.'),
+ o:[L('Complete an order in the rider app','إتمام طلب في تطبيق المندوب'),L('Apply the road safety rules','تطبيق قواعد السلامة على الطريق'),L('Know when and how to contact support','معرفة متى وكيف تتواصل مع الدعم')]},
+{id:'RD-102',lob:'rd',type:'refresher',dur:L('90 min','90 دقيقة'),lvl:L('Core','متوسط'),b:[0,1,2,3],v:'1.3',own:'Global Rider Training',
+ t:L('Rider Support: Device and App Issues','دعم المناديب: مشاكل الجهاز والتطبيق'),
+ d:L('How to guide a rider through a device or app problem and when to start a replacement.','كيف ترشد المندوب في مشكلة بالجهاز أو التطبيق ومتى تبدأ طلب استبدال.'),
+ o:[L('Diagnose the most common app issues','تشخيص أكثر مشاكل التطبيق شيوعًا'),L('Follow the replacement request steps','اتباع خطوات طلب الاستبدال'),L('Log the case correctly','تسجيل الحالة بشكل صحيح')]},
+{id:'VD-101',lob:'vd',type:'newhire',feat:1,dur:L('4 days','4 أيام'),lvl:L('Foundation','أساسي'),b:ALL,v:'3.1',own:'Global Vendor Training',
+ t:L('Vendor Support Essentials','أساسيات دعم المطاعم'),
+ d:L('Support vendors with orders, menus, payouts and portal questions.','دعم المطاعم في الطلبات والقوائم والمدفوعات وأسئلة البوابة.'),
+ o:[L('Answer common vendor portal questions','الإجابة عن أسئلة بوابة المطاعم الشائعة'),L('Handle order and payout disputes','التعامل مع نزاعات الطلبات والمدفوعات'),L('Use the knowledge base for vendor policies','استخدام قاعدة المعرفة لسياسات المطاعم')]},
+{id:'VD-102',lob:'vd',type:'newhire',dur:L('2 days','يومان'),lvl:L('Core','متوسط'),b:[0,2,4,5],v:'1.8',own:'Global Vendor Training',
+ t:L('Menu and Store Changes','تغييرات القائمة والمتجر'),
+ d:L('Update menus, opening hours and availability safely, with the right approvals.','تحديث القوائم وساعات العمل والتوفر بأمان وبالموافقات الصحيحة.'),
+ o:[L('Apply a menu change request','تنفيذ طلب تغيير في القائمة'),L('Check approvals before publishing','التحقق من الموافقات قبل النشر'),L('Confirm the change with the vendor','تأكيد التغيير مع المطعم')]},
+{id:'TL-201',lob:'cs',type:'tools',dur:L('90 min','90 دقيقة'),lvl:L('Core','متوسط'),b:ALL,v:'2.0',own:'Global CS Training',
+ t:L('Copilot for Agents','Copilot للموظفين'),
+ d:L('How to use Copilot suggestions well, and when to rely on the process instead.','كيف تستخدم اقتراحات Copilot بشكل جيد ومتى تعتمد على العملية بدلًا منه.'),
+ o:[L('Read and edit a Copilot suggestion','قراءة اقتراح Copilot وتعديله'),L('Spot when a suggestion does not match the SOP','ملاحظة متى لا يطابق الاقتراح الـ SOP'),L('Report wrong suggestions','الإبلاغ عن الاقتراحات الخاطئة')]},
+{id:'TL-202',lob:'cs',type:'tools',dur:L('60 min','60 دقيقة'),lvl:L('Foundation','أساسي'),b:ALL,v:'1.5',own:'Global Knowledge Base',
+ t:L('Knowledge Base Navigation','التنقل في قاعدة المعرفة'),
+ d:L('Search, filter and rate articles, and know which version is current.','البحث والتصفية وتقييم المقالات ومعرفة النسخة الحالية.'),
+ o:[L('Search with the right keywords','البحث بالكلمات المناسبة'),L('Check owner, version and expiry date','التحقق من المالك والنسخة وتاريخ الانتهاء'),L('Rate an article and suggest a fix','تقييم مقال واقتراح تعديل')]},
+{id:'TT-301',lob:'all',type:'trainer',dur:L('2 days','يومان'),lvl:L('Advanced','متقدم'),b:ALL,v:'1.2',own:'Global Training',
+ t:L('Train the Trainer: Delivering a Lesson Plan','تدريب المدربين: تنفيذ خطة الدرس'),
+ d:L('Deliver a standard 90-minute session from a lesson plan and facilitator guide.','تنفيذ جلسة قياسية مدتها 90 دقيقة من خطة درس ودليل مُيسّر.'),
+ o:[L('Run each part of the session on time','إدارة كل جزء من الجلسة في وقته'),L('Handle common learner questions','التعامل مع أسئلة المتدربين الشائعة'),L('Capture ideas that improve the plan','تسجيل الأفكار التي تحسّن الخطة')]},
+{id:'TT-302',lob:'all',type:'trainer',dur:L('1 day','يوم'),lvl:L('Advanced','متقدم'),b:[0,1,2,3,4],v:'1.0',own:'Global Training',
+ t:L('Writing a Facilitator Guide','كتابة دليل المُيسّر'),
+ d:L('Write timing, handling notes and common mistakes so any trainer can deliver the plan.','كتابة التوقيت وملاحظات التعامل والأخطاء الشائعة ليتمكن أي مدرب من تقديم الخطة.'),
+ o:[L('Set measurable objectives','وضع أهداف قابلة للقياس'),L('Add timing and handling notes','إضافة التوقيت وملاحظات التعامل'),L('Pass the six release checks','اجتياز فحوصات النشر الستة')]},
+{id:'VT-401',lob:'all',type:'refresher',dur:L('45 min','45 دقيقة'),lvl:L('Core','متوسط'),b:ALL,v:'2.1',own:'Global Training',
+ t:L('Vitality: SOP Change Pack','تنشيطي: حزمة تغيير الـ SOP'),
+ d:L('A short pack with a job aid and a micro-quiz, sent when a process changes.','حزمة قصيرة فيها ورقة مساعدة واختبار مصغر، تُرسل عند تغيير العملية.'),
+ o:[L('Explain what changed and why','شرح ما تغيّر ولماذا'),L('Apply the new step in a practice case','تطبيق الخطوة الجديدة في حالة تدريبية'),L('Pass a 5-question check','اجتياز اختبار من 5 أسئلة')]},
+{id:'AS-501',lob:'all',type:'assess',dur:L('60 min','60 دقيقة'),lvl:L('Core','متوسط'),b:ALL,v:'1.1',own:'Global Training',
+ t:L('Nesting Readiness Check','فحص الجاهزية للنزول للعمل'),
+ d:L('One checklist and one gate to decide that an agent or rider is ready to work live.','قائمة واحدة وبوابة واحدة لتقرير جاهزية الموظف أو المندوب للعمل الفعلي.'),
+ o:[L('Complete the practical evaluation','إكمال التقييم العملي'),L('Meet the pass mark on the knowledge check','تحقيق درجة النجاح في اختبار المعرفة'),L('Agree the 30, 60 and 90 day plan','الاتفاق على خطة 30 و60 و90 يومًا')]}
+];
+const U={
+ brand:L('Global Training Academy','أكاديمية التدريب العالمية'),
+ eye:L('Professional training programs','برامج التدريب المهنية'),
+ h1:L('One academy for six brands','أكاديمية واحدة لستة براندات'),
+ intro:L('The Academy runs the training programs for Customer Service, Rider and Vendor teams. Every course has one approved version, one owner and the same structure, so a learner gets the same experience in any brand and with any trainer.','تقدّم الأكاديمية برامج التدريب لفرق خدمة العملاء والمناديب والمطاعم. لكل كورس نسخة معتمدة واحدة ومالك واحد ونفس الهيكل، فيحصل المتدرب على نفس التجربة في أي براند ومع أي مدرب.'),
+ demo:L('Prototype with fictional data','نموذج تجريبي ببيانات وهمية'),
+ pick:L('Choose your brand','اختر البراند'),
+ courses:L('courses','كورس'),
+ featT:L('Featured courses','كورسات مميزة'),featS:L('The core programs for new hires in every line of business.','البرامج الأساسية للموظفين الجدد في كل خط عمل.'),
+ allT:L('All courses','كل الكورسات'),allS:L('Filter by line of business, course type or brand.','صفّي حسب خط العمل أو نوع الكورس أو البراند.'),
+ lLob:L('Line of business','خط العمل'),lType:L('Course type','نوع الكورس'),lQ:L('Search','بحث'),
+ anyLob:L('All lines','كل الخطوط'),anyType:L('All types','كل الأنواع'),
+ reset:L('Reset filters','إعادة الضبط'),
+ show:L('Showing {n} courses','عرض {n} كورس'),showB:L('Showing {n} courses for {b}','عرض {n} كورس لبراند {b}'),
+ more:L('Find out more','اعرف المزيد'),
+ none:L('No courses match. Try another brand or clear the filters.','لا توجد كورسات مطابقة. جرّب براندًا آخر أو امسح التصفية.'),
+ prev:L('Previous','السابق'),next:L('Next','التالي'),
+ ctaT:L('See how the content stays in sync','شاهد كيف يبقى المحتوى متزامنًا'),ctaS:L('Open the Single Source of Training prototype: curriculum, assessments, nesting and the change log.','افتح نموذج Single Source of Training: المنهج والتقييمات والنزول للعمل وسجل التغييرات.'),ctaB:L('Open the prototype','افتح النموذج'),
+ foot:L('© Global Training Academy. Fictional data for demonstration.','© أكاديمية التدريب العالمية. بيانات وهمية للعرض.'),
+ close:L('Close','إغلاق'),
+ obj:L('What learners can do after the course','ماذا يستطيع المتدرب بعد الكورس'),
+ avail:L('Available in','متاح في'),
+ fmt:L('Standard 90-minute session format','هيكل الجلسة القياسية (90 دقيقة)'),
+ dur:L('Duration','المدة'),lvl:L('Level','المستوى'),ver:L('Version','النسخة'),own:L('Owner','المالك'),line:L('Line of business','خط العمل'),type:L('Type','النوع'),
+ live:L('live','متاح'),soon:L('not yet','غير متاح'),
+ seg:[['Opening','افتتاح',10],['Explanation','شرح',25],['Practice','تطبيق',30],['Knowledge check','اختبار',15],['Wrap-up','ختام',10]],
+ links:[L('About the Academy','عن الأكاديمية'),L('Course owners','مالكو الكورسات'),L('Suggest a course','اقترح كورسًا')]
+};
+let lang='e';try{lang=localStorage.getItem('gta-lang')||'e'}catch(e){}
+const S={brand:-1,lob:'',type:'',q:'',page:1};
+const PER=6;
+const $=i=>document.getElementById(i);
+const t=o=>o[lang];
+const f=(s,m)=>s.replace(/\{(\w+)\}/g,(_,k)=>m[k]);
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+function match(c,ignoreFilters){
+  if(S.brand>=0&&!c.b.includes(S.brand))return false;
+  if(ignoreFilters)return true;
+  if(S.lob&&c.lob!==S.lob&&c.lob!=='all')return false;
+  if(S.type&&c.type!==S.type)return false;
+  if(S.q){const h=(c.t.e+' '+c.t.a+' '+c.d.e+' '+c.d.a+' '+c.id).toLowerCase();if(!h.includes(S.q.toLowerCase()))return false}
+  return true;
+}
+function card(c,feat){
+  return '<article class="course'+(feat?' feat':'')+'"><div class="tags"><span class="tag lob">'+esc(t(LOB[c.lob]))+'</span><span class="tag">'+esc(t(TYPE[c.type]))+'</span></div>'+
+  '<h3>'+esc(t(c.t))+'</h3><p>'+esc(t(c.d))+'</p>'+
+  '<div class="meta"><span>'+esc(t(c.dur))+'</span><span>'+esc(t(c.lvl))+'</span><span>v'+c.v+'</span></div>'+
+  '<button class="more" type="button" data-id="'+c.id+'">'+esc(t(U.more))+' &rarr;</button></article>';
+}
+function render(){
+  document.documentElement.lang=lang==='a'?'ar':'en';
+  document.documentElement.dir=lang==='a'?'rtl':'ltr';
+  document.title=lang==='a'?'أكاديمية التدريب العالمية':'Global Training Academy';
+  $('langBtn').textContent=lang==='a'?'English':'العربية';
+  $('brandName').textContent=t(U.brand);$('eyebrow').textContent=t(U.eye);$('h1').textContent=t(U.h1);
+  $('intro').textContent=t(U.intro);$('demo').textContent=t(U.demo);$('pickBrand').textContent=t(U.pick);
+  $('featT').textContent=t(U.featT);$('featS').textContent=t(U.featS);$('allT').textContent=t(U.allT);$('allS').textContent=t(U.allS);
+  $('lLob').textContent=t(U.lLob);$('lType').textContent=t(U.lType);$('lQ').textContent=t(U.lQ);$('reset').textContent=t(U.reset);
+  $('ctaT').textContent=t(U.ctaT);$('ctaS').textContent=t(U.ctaS);$('ctaB').textContent=t(U.ctaB);$('foot').textContent=t(U.foot);
+  $('flinks').innerHTML=U.links.map(l=>'<a href="#" onclick="return false">'+esc(t(l))+'</a>').join('');
+  // tiles
+  $('tiles').innerHTML=BR.map((b,i)=>{const n=C.filter(c=>c.b.includes(i)).length;
+    return '<button class="tile" type="button" data-b="'+i+'" aria-pressed="'+(S.brand===i)+'">'+esc(b)+'<small>'+n+' '+esc(t(U.courses))+'</small></button>'}).join('');
+  // selects
+  $('fLob').innerHTML='<option value="">'+esc(t(U.anyLob))+'</option>'+['cs','rd','vd'].map(k=>'<option value="'+k+'"'+(S.lob===k?' selected':'')+'>'+esc(t(LOB[k]))+'</option>').join('');
+  $('fType').innerHTML='<option value="">'+esc(t(U.anyType))+'</option>'+Object.keys(TYPE).map(k=>'<option value="'+k+'"'+(S.type===k?' selected':'')+'>'+esc(t(TYPE[k]))+'</option>').join('');
+  $('fQ').value=S.q;
+  // featured
+  const feat=C.filter(c=>c.feat&&match(c,true));
+  $('featured').innerHTML=feat.length?feat.map(c=>card(c,true)).join(''):'<div class="empty">'+esc(t(U.none))+'</div>';
+  // all
+  const list=C.filter(c=>match(c));
+  const pages=Math.max(1,Math.ceil(list.length/PER));
+  if(S.page>pages)S.page=pages;
+  const slice=list.slice((S.page-1)*PER,S.page*PER);
+  $('count').textContent=S.brand>=0?f(t(U.showB),{n:list.length,b:BR[S.brand]}):f(t(U.show),{n:list.length});
+  $('all').innerHTML=slice.length?slice.map(c=>card(c,false)).join(''):'<div class="empty" style="grid-column:1/-1">'+esc(t(U.none))+'</div>';
+  let p='';
+  if(pages>1){
+    p+='<button class="pg" type="button" data-p="'+(S.page-1)+'"'+(S.page===1?' disabled':'')+'>'+esc(t(U.prev))+'</button>';
+    for(let i=1;i<=pages;i++)p+='<button class="pg" type="button" data-p="'+i+'"'+(i===S.page?' aria-current="page"':'')+'>'+i+'</button>';
+    p+='<button class="pg" type="button" data-p="'+(S.page+1)+'"'+(S.page===pages?' disabled':'')+'>'+esc(t(U.next))+'</button>';
+  }
+  $('pager').innerHTML=p;
+  if(!$('drawer').hidden&&S.open)openCourse(S.open);
+}
+function openCourse(id){
+  const c=C.find(x=>x.id===id);if(!c)return;S.open=id;
+  const chips=BR.map((b,i)=>'<span class="chip '+(c.b.includes(i)?'on':'off')+'">'+esc(b)+' · '+esc(t(c.b.includes(i)?U.live:U.soon))+'</span>').join('');
+  const bar=U.seg.map(s=>'<span style="flex:'+s[2]+'">'+esc(lang==='a'?s[1]:s[0])+' '+s[2]+'</span>').join('');
+  $('drawer').innerHTML='<div class="scrim" id="scrim"><div class="panel" role="dialog" aria-modal="true" aria-labelledby="pt">'+
+   '<button class="close" id="closeBtn" type="button">'+esc(t(U.close))+'</button>'+
+   '<div class="tags"><span class="tag lob">'+esc(t(LOB[c.lob]))+'</span><span class="tag">'+esc(t(TYPE[c.type]))+'</span><span class="tag">'+c.id+'</span></div>'+
+   '<h2 id="pt">'+esc(t(c.t))+'</h2><p style="margin:0;color:var(--muted)">'+esc(t(c.d))+'</p>'+
+   '<dl class="kv"><dt>'+esc(t(U.dur))+'</dt><dd>'+esc(t(c.dur))+'</dd><dt>'+esc(t(U.lvl))+'</dt><dd>'+esc(t(c.lvl))+'</dd><dt>'+esc(t(U.ver))+'</dt><dd>v'+c.v+'</dd><dt>'+esc(t(U.own))+'</dt><dd>'+esc(c.own)+'</dd></dl>'+
+   '<h4>'+esc(t(U.obj))+'</h4><ul>'+c.o.map(o=>'<li>'+esc(t(o))+'</li>').join('')+'</ul>'+
+   '<h4>'+esc(t(U.fmt))+'</h4><div class="bar" aria-hidden="true">'+bar+'</div>'+
+   '<h4>'+esc(t(U.avail))+'</h4><div class="avail">'+chips+'</div></div></div>';
+  $('drawer').hidden=false;
+  $('closeBtn').focus();
+}
+function closeCourse(){S.open=null;$('drawer').hidden=true}
+document.addEventListener('click',e=>{
+  const tl=e.target.closest('.tile');if(tl){const i=+tl.dataset.b;S.brand=S.brand===i?-1:i;S.page=1;render();return}
+  const m=e.target.closest('.more');if(m){openCourse(m.dataset.id);return}
+  const pg=e.target.closest('.pg');if(pg&&!pg.disabled){S.page=+pg.dataset.p;render();$('allT').scrollIntoView({behavior:'smooth',block:'start'});return}
+  if(e.target.id==='scrim'||e.target.id==='closeBtn'){closeCourse();return}
+});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('drawer').hidden)closeCourse()});
+$('fLob').addEventListener('change',e=>{S.lob=e.target.value;S.page=1;render()});
+$('fType').addEventListener('change',e=>{S.type=e.target.value;S.page=1;render()});
+$('fQ').addEventListener('input',e=>{S.q=e.target.value;S.page=1;const pos=e.target.selectionStart;render();const q=$('fQ');q.focus();try{q.setSelectionRange(pos,pos)}catch(x){}});
+$('reset').addEventListener('click',()=>{S.brand=-1;S.lob='';S.type='';S.q='';S.page=1;render()});
+$('langBtn').addEventListener('click',()=>{lang=lang==='a'?'e':'a';try{localStorage.setItem('gta-lang',lang)}catch(e){}render()});
+render();
+</script>
+</body></html>
